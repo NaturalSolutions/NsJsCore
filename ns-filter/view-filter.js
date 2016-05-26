@@ -72,7 +72,7 @@
     + '<div class="clear"></div>'
 
     var tplinterval =
-   '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
+   '<form class="filter form-horizontal filterinterval filter-form-<%=fieldname%>" style="position:relative">'
    + '<div   class="clearfix">'
        + '<span data-editors="Column"></span>'
        + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
@@ -107,7 +107,7 @@
       + '</div>'
     + '</div>';
 
-    var tplAddedInterval = '<div class="filter clearfix">'
+    var tplAddedInterval = '<div class="filter filterinterval clearfix">'
      + '<div class="clearfix">'
        + '<div class="legend">'
         + '<label class="col-xs-12"><%= filterName %>:</label>'
@@ -422,11 +422,11 @@
                 valeur = this.filtersValues[fieldName].value;
                 operatorValue = this.filtersValues[fieldName].operatorValue;
                 if (this.filtersValues[fieldName].operatorValue == 'IN') {
-                    schm.value = this.initValuesShemaIn(schma.value, this.filtersValues[fieldName].operatorValue);
+                    schm.value = this.initValuesShemaIn(schm.Value, this.filtersValues[fieldName].operatorValue);
                 }
             }
             else {
-                operatorValue = schm.Operator.options[0];
+                operatorValue = schm.Operator.options[0].val;;
             }
 
             var Formdata = {
@@ -435,7 +435,7 @@
                 Operator: operatorValue
             };
 
-            var operatorValue = schm['Operator'].options[0].val;
+           
 
             var md = Backbone.Model.extend({
                 schema: schm,
@@ -491,7 +491,7 @@
                 }*/
                 this.previousOperator = NewOperator;
             });
-            console.log(form);
+            //console.log(form);
             return form;
 
         },
@@ -653,7 +653,7 @@
                     break;
                     break;
                 case "Number":
-                    return operatorsOptions = ['=', '<>', '<', '>', '<=', '>=', 'IN'];
+                    return operatorsOptions = [{ label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '>', val: '>' }, { label: '<', val: '<' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }, { label: 'IN', val: 'IN' }];
                     break;
                 default:
                     return operatorsOptions = [{ label: 'Equals', val: 'Is' }, { label: 'Does Not Equal', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Does not Begin with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Does not end with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Does not Contain', val: 'Not Contains' }, { label: 'In', val: 'IN' }, ];

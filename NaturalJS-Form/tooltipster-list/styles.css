@@ -1,0 +1,36 @@
+.tooltipList .tooltipster-content {
+  padding: 0;
+  max-height : 300px;
+}
+.tooltipList input {
+  margin: 8px;
+}
+.tooltipList ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+    max-height : 300px;
+}
+.tooltipList ul li {
+  height: 30px;
+  line-height: 30px;
+  padding-left: 10px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 17px;
+}
+.tooltipList ul li:nth-child(odd) {
+  background-color: #111;
+}
+.tooltipList ul li:nth-child(odd) {
+  background-color: #222;
+}
+.tooltipList ul li:after {
+  content: "+";
+  font-size: 20px;
+  position: relative;
+  left: 67%;
+}
+.tooltipList ul li:hover {
+  cursor: pointer;
+}
