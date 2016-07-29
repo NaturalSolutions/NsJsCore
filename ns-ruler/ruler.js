@@ -2,7 +2,7 @@
 
     // Set up Backbone appropriately for the environment. Start with AMD.
     if (typeof define === 'function' && define.amd) {
-        console.log('amd');
+
         define(['jquery',
     'underscore',
     'backbone',
@@ -54,39 +54,49 @@
 
     };
 
+    NsRuler = Backbone.View.extend({
+        form: null,
+        sourceFields:{},
+        initialize: function (options) {
+            this.form = options.form;
+            this.option = options;
+            this.sourceFields = {};
 
-    // -------------------------------------------------- //
-    // -------------------------------------------------- //
-
-
-    // I return an initialized object.
-    function Ruler() {
-        // Store the private instance id.
-        this._instanceID = getNewInstanceID();
-        this.components = [];
-        // Return this object reference.
-        return (this);
-
-    }
-
-    // I return the current instance count. I am a static method
-    // on the Com class.
-    Ruler.getInstanceCount = function () {
-        return (instanceCount);
-    };
-
-
-    // Define the class methods.
-    Ruler.prototype = {
-        // I return the instance ID for this instance.
-        getInstanceID: function () {
-            return (this._instanceID);
         },
-    };
+        addRule: function (target, operator, source) {
+            var _this = this;
+            if (this.sourceFields[source] == null) {
+                this.sourceFields[source] = [{ target: target, operator: operator }];
+            }
+            else {
+                this.sourceFields[source].push({ target: target, operator: operator });
+            }
+            //console.log('ADD Rule', this.sourceFields, this.sourceFields[source], this.sourceFields[source].length);
+
+            this.form.$el.find(('#' + this.getEditor(source).id)).on('change keyup paste', function (e) {
+                _this.ApplyRules(e);
+            });
+            
+            //this.form.$el.find(('#' + this.getEditor(source).id)).keypress(this.ApplyRules);
+
+            
+            //console.log('Editor', this.form.$el.find(('#' + this.getEditor(source).id)), this.getEditor(source).id,this.sourceFields);
+            
+        },
+        getEditor: function (name) {
+            return this.form.fields[name].editor;
+        },
+        ApplyRules: function (evt) {
+            var sourceName = evt.currentTarget.name;            
+            var ruleList = this.sourceFields[sourceName];
+            for (var i = 0; i < ruleList.length; i++) {
+                this.form.$el.find(('#' + this.getEditor(ruleList[i].target).id)).val(this.getEditor(sourceName).getValue());
+            }
+        }
+    });
 
 
 
-
-    return (Ruler);
+    return (NsRuler);
 
 }));
