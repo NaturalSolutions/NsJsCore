@@ -9,11 +9,13 @@
       'underscore',
       'backbone',
       'marionette',
-      'backbone_forms'
-      ], function ( $, _, Backbone, Marionette, BackboneForm, exports) {
+      'backbone_forms',
+      //'./../AutoSize/autosize'
+      'autosize'
+        ], function ($, _, Backbone, Marionette, BackboneForm, autosize, exports) {
           // Export global even in AMD case in case this script is loaded with
           // others that may still expect a global Backbone.
-          var Retour = factory(root, exports, $, _, Backbone, Marionette, BackboneForm);
+          var Retour = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, autosize);
           console.log(Retour) ;
           return Retour;
       });
@@ -30,9 +32,9 @@
         var BackboneForm=  Backbone.Form ;
         /*var brfs = require('brfs')
         var tpl = brfs('./Templates/NsFormsModule.html');*/
-       
+        autosize = require('autosize');
         
-		module.exports = factory(root, exports, $, _, Backbone, Marionette, BackboneForm);
+        module.exports = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, autosize);
 		//return Retour ;
         // Finally, as a browser global.
     } else {
@@ -40,7 +42,7 @@
         //root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
     }
 
-}(this, function (root, NsForm,$, _, Backbone, Marionette, BackboneForm) {
+}(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, autosize) {
  var tpl = '<div id="NsFormButton">' 
      +'<button class="NsFormModuleCancel<%=formname%>">'
      + 'Cancel '
@@ -67,7 +69,7 @@
         id: null,
         reloadAfterSave: true,
         template: tpl,
-
+        autosizeTextArea:true,
         redirectAfterPost: "",
 
         extendsBBForm: function () {
@@ -139,7 +141,9 @@
                 this.template = _.template($(tpl).html(), variables);
             }
 
-
+            if (options.autosizeTextArea != null && !options.autosizeTextArea) {
+                this.autosizeTextArea = false;
+            }
             if (options.id && !isNaN(options.id)) {
                 this.id = options.id;
             }
@@ -282,6 +286,11 @@
 
 
             this.displaybuttons();
+            if (this.autosizeTextArea) {
+                setTimeout(function () {
+                    autosize($('textarea'));
+                }, 0);
+            }
         },
         AfterShow: function () {
             // to be extended
