@@ -2,7 +2,6 @@
 
     // Set up Backbone appropriately for the environment. Start with AMD.
     if (typeof define === 'function' && define.amd) {
-        console.log('amd');
         define(['jquery',
     'underscore',
     'backbone',
@@ -72,7 +71,7 @@
     + '<div class="clear"></div>'
 
     var tplinterval =
-   '<form class="filter form-horizontal filterinterval filter-form-<%=fieldname%>" style="position:relative">'
+   '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
    + '<div   class="clearfix">'
        + '<span data-editors="Column"></span>'
        + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
@@ -107,7 +106,7 @@
       + '</div>'
     + '</div>';
 
-    var tplAddedInterval = '<div class="filter filterinterval clearfix">'
+    var tplAddedInterval = '<div class="filter clearfix">'
      + '<div class="clearfix">'
        + '<div class="legend">'
         + '<label class="col-xs-12"><%= filterName %>:</label>'
@@ -130,7 +129,6 @@
     Backbone.Form.validators.INNumber = function (options) {
         return function INNumber(value) {
 
-            console.log('this', this, value,options);
             if (value == '') return null ;
             //return null;
             //var myRegEx = new RegExp('[\d*\s]*\d*$');
@@ -196,8 +194,10 @@
             this.url = options.url;
             this.datas = {};
 
+            this.firstOperator = options.firstOperator;
             this.url = options.url + 'getFilters';
             this.forms = [];
+
             if (options.filtersValues) {
                 this.filtersValues = this.getValuesAsDic(options.filtersValues);
             }
@@ -232,9 +232,8 @@
         getValuesAsDic: function (filterArray) {
 
             var filterValues = {};
-
             for (var i = 0 ; i < filterArray.length; i++) {
-                curFiltre = filterValues[filterArray[i].Column];
+                curFiltre = filterValues[filterArray[i]['Column']];
                 if (curFiltre == null) {
                     curFiltre = {}
                     curFiltre.operatorValue = filterArray[i].Operator;
@@ -280,7 +279,7 @@
         initFilters: function (data) {
             var form;
             var _this = this;
-      this.forms = [];
+            this.forms = [];
             for (var key in data) {
                 form = this.initFilter(data[key]);
                 this.getContainer().append(form.el);
@@ -306,7 +305,7 @@
             this.getContainer().keypress(function (e) {                                       
                     
                     if (e.which == 13) {
-                        console.log('keypressed') ;
+                        //console.log('keypressed') ;
                         e.preventDefault();
                         _this.update() ;
                         //do something   
@@ -379,6 +378,7 @@
                 }
             }
 
+
             editorClass += ' ' + dataRow['name'];
             if (isInterval) {
 
@@ -399,11 +399,14 @@
         getBBFormFromFilter: function (dataRow, editorClass, type, operators, template, indice) {
             var _this = this;
             var fieldName = dataRow['name'];
+
+            var operatorList =  operators || this.getOpOptions(type);
+            
             var schm = {
                 Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
                 ColumnType: { name: 'ColumnType', title: '', type: 'Hidden', value: type },
                 Operator: {
-                    type: 'Select', title: dataRow['label'], options: operators || this.getOpOptions(type), editorClass: 'form-control ',//+ classe,
+                    type: 'Select', title: dataRow['label'], options:operatorList, editorClass: 'form-control ',//+ classe,
                 },
 
                 //Value: dataRow
@@ -412,7 +415,7 @@
                     title: dataRow['label'],
                     editorClass: editorClass,
                     options: this.getValueOptions(dataRow),
-                    validators: []
+                    validators: [],
                 }
             }
 
@@ -422,20 +425,29 @@
                 valeur = this.filtersValues[fieldName].value;
                 operatorValue = this.filtersValues[fieldName].operatorValue;
                 if (this.filtersValues[fieldName].operatorValue == 'IN') {
-                    schm.value = this.initValuesShemaIn(schm.Value, this.filtersValues[fieldName].operatorValue);
+                    schm.value = this.initValuesShemaIn(schma.value, this.filtersValues[fieldName].operatorValue);
                 }
             }
             else {
-                operatorValue = schm.Operator.options[0].val;;
+                operatorValue = schm.Operator.options[0].label;
             }
 
-            var Formdata = {
+            if (this.firstOperator ) {
+                operatorValue = this.firstOperator;
+                if (this.firstOperator.indexOf('null') != 1){
+                    valeur = 'null';
+                    if (type == 'Number' || type == 'Select'){
+                        valeur = 1;
+                    }
+                }
+            }
+            var Formdata = {    
                 ColumnType: type,
                 Column: fieldName,
                 Operator: operatorValue
             };
 
-           
+            //var operatorValue = schm['Operator'].options[0].val;
 
             var md = Backbone.Model.extend({
                 schema: schm,
@@ -448,23 +460,32 @@
                 }
             });
             var mod = new md();
-            //console.log(mod);
-            //mod.set('Value',valeur);
+
             var form = new BbForms({
                 template: _.template(template),
                 model: mod,
                 data: Formdata,
                 templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
             }).render();
-            form.previousOperator = mod.get('Operator');
+            form.previousOperator = mod.get('Operator').val;
+            if (!form.previousOperator){
+                form.previousOperator = mod.get('Operator');
+            }
             form.indice = this.forms.length;
+
+            if (this.firstOperator ) {
+                operatorValue = this.firstOperator;
+                if (this.firstOperator.indexOf('null') != 1){
+                    form.$el.find('span.filter').addClass('hide');
+                }
+            }
+
             form.on('Operator:change', function (infos, editor) {
                 var NewOperator = editor.getValue();
 
                 if (this.previousOperator == 'IN' || NewOperator == 'IN') {
-                    // on agit que si on passe de in à autre chose ou autre chose à in, sinon pas d'action
+                    // on agit que si on passe de in � autre chose ou autre chose � in, sinon pas d'action
 
-                    console.log(this);
                     if (NewOperator == 'IN') {
                         this.schema.Value = _this.initValuesShemaIn(this.schema.Value);
                     }
@@ -475,13 +496,34 @@
                     this.model.set('Value', '');
                     this.model.set('Operator', NewOperator);
 
-                    console.log(this);
-                    //this.model.set('schema', schema);$el = 
                     form.initialize();
                     this.render();
-                    //console.log(this);
                     _this.getContainer().find(' > .filter').eq(this.indice).html(this.$el);
-                    //$('#filters >.filter').eq(this.indice).html(this.$el);
+                }
+                elVal = _this.getContainer().find(' > .filter').eq(this.indice).find('span.filter');
+
+                if ((this.previousOperator && this.previousOperator.indexOf('null')!=-1 )|| NewOperator.indexOf('null')!=-1) {
+                    if (NewOperator.indexOf('null')!=-1) {
+                        elVal.addClass('hide');
+                        if (this.model.get('ColumnType') != 'Number'){
+                            elVal.find('input').val('null').attr('data_value','null').change();
+                        } else {
+                            elVal.find('input').val(1).change();
+                        }
+
+                    }
+                    else {
+                        elVal.find('input').val('').attr('data_value','').change();
+                        var errorEL = _this.getContainer().find(' > .filter').eq(this.indice).find('.error');
+                        errorEL.removeClass('error');
+                        elVal.removeClass('hide');
+                        //_this.getContainer().find(' > .filter').eq(this.indice).show();
+                    }
+                } else {
+                    var errorEL = _this.getContainer().find(' > .filter').eq(this.indice).find('.error');
+                    errorEL.removeClass('error');
+                    //elVal.find('input').val('').attr('data_value','').change();
+                    elVal.removeClass('hide');
                 }
                 /*if (this.indice == 0) {
                     $('#filters').prepend(this.$el);
@@ -491,7 +533,7 @@
                 }*/
                 this.previousOperator = NewOperator;
             });
-            //console.log(form);
+
             return form;
 
         },
@@ -561,8 +603,7 @@
             });
 
             var mod = new md();
-            //console.log(mod);
-            //mod.set('Value',valeur);
+
             var form = new BbForms({
                 template: _.template(template),
                 model: mod,
@@ -600,7 +641,6 @@
             }
             else {
                 // CheckAll, all check input affected to checkAll Value
-                //console.log('checkall');
                 $(this).parent().parent().find('input:checkbox').each(function () {
                     $(this).prop('checked', IsChecked);
                 });
@@ -639,26 +679,25 @@
             var operatorsOptions;
             switch (type) {
                 case "Text": case "AutocompTreeEditor": case "AutocompleteEditor":
-                    return operatorsOptions = [{ label: 'Equals', val: 'Is' }, { label: 'Does Not Equal', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Does not Begin with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Does not end with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Does not Contain', val: 'Not Contains' }, { label: 'In', val: 'IN' }, ];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }, ];
                     break;
                 case "DateTimePickerEditor":
                     //return operatorsOptions = [{ label: '<', val: '<' }, { label: '>', val: '>' }, { label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }];
-                    return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
+                    return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='}];
                     break;
                 case "Select":
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
                     break;
                 case "Checkboxes":
                     return operatorsOptions = [{ label: 'Checked', val: 'Checked' }];
                     break;
                     break;
                 case "Number":
-                    return operatorsOptions = [{ label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '>', val: '>' }, { label: '<', val: '<' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }, { label: 'IN', val: 'IN' }];
+                    return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='}, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
                     break;
                 default:
-                    return operatorsOptions = [{ label: 'Equals', val: 'Is' }, { label: 'Does Not Equal', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Does not Begin with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Does not end with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Does not Contain', val: 'Not Contains' }, { label: 'In', val: 'IN' }, ];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }, ];
                     break;
-
             }
         },
 
@@ -669,10 +708,10 @@
                 currentForm = this.forms[i];
                 //var type = typeof currentForm.getValue().Value;
                 var Validation = currentForm.validate();
-                //console.log(Validation);
                 currentForm.$el.find('input.filter').removeClass('active')
                 if (!currentForm.validate()) {
                     value = currentForm.getValue();
+                    //delete value.ColumnType;
 
                     if (value.Operator == 'between') {
                         var ValueFrom = { Operator: '>=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
@@ -783,11 +822,22 @@
 
                             objVal = obj.attributes[col];
 
-                            //date
-                            if (moment.isMoment(val)) {
-                                pass = ctx.testDate(val, op, objVal);
+                            var format = obj.get('format');
+                            //date  
+                            var dt = moment(val, 'DD/MM/YYYY HH:mm:ss'); 
+                            var operator = false;
+                            if(['=', '>','<','>=','<=','<>'].indexOf(op) >= 0) {
+                                operator = true;
+                            }
+                            if (dt.isValid() && operator){
+                            //if (moment(val).isValid) {
+                                pass = ctx.testDate(objVal, op, val,format);
                             } else {
-                                pass = ctx.testMatch(val, op, objVal);
+                                if (objVal &&  val) {
+                                    pass = ctx.testMatch (objVal, op, val);
+                                } else { 
+                                    pass = false;
+                                }
                             };
                         }
                     };
@@ -814,20 +864,28 @@
                     };
                     break;
                 case 'is not':
-                    val = val.toUpperCase();
-                    rx = new RegExp('^(^' + val + ')$'); //todo : not sure
-                    if (!rx.test(objVal.toUpperCase())) {
+                    objVal = objVal.toUpperCase();
+                    rx = new RegExp('^(^' + objVal + ')$'); //todo : not sure
+                    if (rx.test(val.toUpperCase())) {
                         return false;
                     };
                     break;
                 case 'contains':
-                    val = val.toUpperCase();
-                    rx = new RegExp(val);
-                    if (!rx.test(objVal.toUpperCase())) {
+                    objVal = objVal.toUpperCase();
+                    rx = new RegExp(objVal);
+                    if (!rx.test(val.toUpperCase())) {
+                        return false;
+                    };
+                    break;
+                case 'not contains':
+                    objVal = objVal.toUpperCase();
+                    rx = new RegExp(objVal);
+                    if (rx.test(val.toUpperCase())) {
                         return false;
                     };
                     break;
                 case '=':
+                case 'equals':
                     if (!(objVal == val)) {
                         return false;
                     };
@@ -857,7 +915,56 @@
                         return false;
                     };
                     break;
+                case 'begins':
+                    objVal = objVal.toUpperCase();
+                    rx = new  RegExp("^" + objVal, "i");
+                    if (!rx.test(val.toUpperCase())) {
+                        return false;
+                    };
+                    break;
+                case 'not begin':
+                    objVal = objVal.toUpperCase();
+                    rx = new  RegExp("^" + objVal, "i");
+                    if (rx.test(val.toUpperCase())) {
+                        return false;
+                    };
+                    break;
+                case 'ends':
+                    objVal = objVal.toUpperCase();
+                    rx = new  RegExp( objVal +  '$', "i");
+                    if (!rx.test(val.toUpperCase())) {
+                        return false;
+                    };
+                    break;
+                 case 'not end':  
+                    objVal = objVal.toUpperCase();
+                    rx = new  RegExp( objVal +  '$', "i");
+                    if (rx.test(val.toUpperCase())) {
+                        return false;
+                    };
+                    break;
+                case 'in':  
+                    var elems = objVal.split(',');
+                    var elems2 = objVal.split(';');
+                    var tab;
+                    if (elems.length >1){
+                        tab = elems;
+                    } else if(elems2.length >1){
+                        tab = elems2;
+                    }
+                    else {
+                        return false;
+                    }
+                    for (var i=0; i< tab.length;i++){
+                        var elem = tab[i].toUpperCase();
+                        if ((elem == val)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                    
                 default:
+
                     console.warn('wrong opperator');
                     return false;
                     break;
@@ -865,9 +972,14 @@
             return true;
         },
 
-        testDate: function (val, op, objVal) {
-            var dateA = moment(val);
-            var dateB = moment(objVal);
+        testDate: function (val, op, objVal,format) {
+            var dateA = moment(val,'DD/MM/YYYY HH:mm:ss');
+            var dateB = moment(objVal,'DD/MM/YYYY HH:mm:ss');
+
+            if (format) {
+                dateA = moment(val,format);
+            }
+
 
             switch (op.toLowerCase()) {
                 case '=':
@@ -892,12 +1004,12 @@
                     break;
                     //todo : verify those 2
                 case '>=':
-                    if (!(dateA.isAfter(dateB)) || !(dateB.isSame(dateA))) {
+                    if (!(dateA.isAfter(dateB)) && !(dateB.isSame(dateA))) {
                         return false;
                     };
                     break;
                 case '<=':
-                    if (!(dateA.isBefore(dateB)) || !(dateB.isSame(dateA))) {
+                    if (!(dateA.isBefore(dateB)) && !(dateB.isSame(dateA))) {
                         return false;
                     };
                     break;
@@ -910,7 +1022,7 @@
             return true;
 
         },
-
+        
         interaction: function (action, params) {
             if (this.com) {
                 this.com.action(action, params);
@@ -920,7 +1032,7 @@
         },
 
         action: function (action, params) {
-            // Rien à faire
+            // Rien  faire
             return;
         },
 
