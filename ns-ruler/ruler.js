@@ -3,7 +3,7 @@
     // Set up Backbone appropriately for the environment. Start with AMD.
     if (typeof define === 'function' && define.amd) {
 
-        define(['jquery',
+     define(['jquery',
     'underscore',
     'backbone',
     'backbone_forms',
