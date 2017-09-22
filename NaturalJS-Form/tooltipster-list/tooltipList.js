@@ -25,7 +25,11 @@
             //  We set an useless default li click event callback
             liClickEvent : function(liValue, origin, tooltip) {
                 console.log ("Li clicked, value : ", liValue);
-            }
+            },
+            searchEnter: function (searchedValue) {
+                console.log("Search enter, value : ", searchedValue);
+            },
+            searchPlaceholder : ""
         }, options);
 
         //  -----------------------------------------------
@@ -35,6 +39,14 @@
             this.tooltip.find('li').bind('click', $.proxy(function(e) {
                 //  Run specified callback
                 this.settings.liClickEvent($(e.target).data('value'), this.origin, this.tooltip);
+            }, this));
+        };
+
+        this.bindSearchEnter = function () {
+            this.tooltip.find('input').bind('keyup', $.proxy(function (e) {
+                if (e.which == 13) {
+                    this.settings.searchEnter($(e.target).val());
+                }
             }, this));
         };
 
@@ -112,7 +124,12 @@
                     this.updateLiList( $(e.target).val(), origin, tooltip );
                 }, this));
 
+                $(tooltip).find('input').attr("placeholder", this.settings.searchPlaceholder);
+
                 this.updateLiList("", origin, tooltip);
+                this.bindSearchEnter();
+
+                $(tooltip).find('input').focus();
             }, this),
 
             functionAfter: function (origin, tooltip) {

@@ -13,7 +13,6 @@
 
     // Set up Backbone appropriately for the environment. Start with AMD.
     if (typeof define === 'function' && define.amd) {
-        console.log('amd');
         define(['jquery',
         'underscore',
         'backbone',
@@ -123,7 +122,6 @@
             this.url = options.url;
             this.pageSize = options.pageSize;
 
-
             this.pagingServerSide = options.pagingServerSide;
             if (options.columns) {
                 this.columns = options.columns;
@@ -145,6 +143,7 @@
             if (options.filterCriteria) {
                 this.filterCriteria = options.filterCriteria;
             }
+
             this.initGrid();
             this.eventHandler();
         },
@@ -276,7 +275,7 @@
         },
 
 
-        initGrid: function () {
+        initGrid: function (options) {
             var tmp = JSON.stringify({ criteria: null });
 
             this.grid = new Backgrid.Grid({
@@ -284,12 +283,22 @@
                 columns: this.columns,
                 collection: this.collection
             });
+
+            /* TESTING
+            var Model = Backbone.Model.extend({});
+            var Collection = Backbone.Collection.extend({ model: Model });
+            var poolcolumn = { name: "IsPool", label: "IsPool", cell: "string" };
+
+            this.grid.insertColumn(poolcolumn);
+
+            console.log("INSERTED POOL COLUMN", this.grid);
+
+            */
+
             if (!this.coll) {
                 this.collection.searchCriteria = this.filterCriteria;
                 this.fetchCollection({ init: true });
             }
-
-            //this.collection.on('change', this.collectionFetched);
         },
 
         collectionFetched: function (options) {

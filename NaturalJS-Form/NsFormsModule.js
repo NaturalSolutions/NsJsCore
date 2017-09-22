@@ -4,25 +4,22 @@
 
     // Set up Backbone appropriately for the environment. Start with AMD.
     if (typeof define === 'function' && define.amd) {
-        console.log('amd');
         define(['jquery',
-      'underscore',
-      'backbone',
-      'marionette',
-      'backbone_forms',
-      //'./../AutoSize/autosize'
-      'autosize'
-        ], function ($, _, Backbone, Marionette, BackboneForm, autosize, exports) {
+                'underscore',
+                'backbone',
+                'marionette',
+                'backbone_forms',
+                'sweetalert',
+                'autosize'
+        ], function ($, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize, exports) {
           // Export global even in AMD case in case this script is loaded with
           // others that may still expect a global Backbone.
-          var Retour = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, autosize);
-          console.log(Retour) ;
+            var Retour = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize);
           return Retour;
       });
 
         // Next for Node.js or CommonJS. jQuery may not be needed as a module.
     } else if (typeof exports !== 'undefined') {
-		console.log('common JS');
         var $ = require('jquery');
         var _ = require('underscore');
         var Backbone = require('backbone');
@@ -42,17 +39,20 @@
         //root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
     }
 
-}(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, autosize) {
+}(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize) {
  var tpl = '<div id="NsFormButton">' 
      +'<button class="NsFormModuleCancel<%=formname%>">'
      + 'Cancel '
     +'</button>'
     +'<button class="NsFormModuleSave<%=formname%>">'
         +'Save' 
-    +'</button>'
-        +'<button class="NsFormModuleEdit<%=formname%>">'
-        +'Edit'
-    +'</button>'
+    + '</button>'
+        + (window.currentUser && window.currentUser.isAdmin ? '<button class="NsFormModuleEdit<%=formname%> NsFormEditButton">'
+        + 'Edit'
+    + '</button>' : "")
+        + (window.currentUser && window.currentUser.isAdmin ? '<button class="NsFormModuleDelete<%=formname%> NsFormDeleteButton">'
+        + 'Delete'
+    + '</button>' : "")
         +'<button class="NsFormModuleClear<%=formname%>">'
         +'Clear' 
     +'</button>'
@@ -78,12 +78,12 @@
             Backbone.Form.Editor.prototype.initialize = function (options) {
                 var options = options || {};
 
+
                 //Set initial value
                 if (options.model) {
                     if (!options.key) throw new Error("Missing option: 'key'");
 
                     this.model = options.model;
-
                     this.value = this.model.get(options.key);
                 }
                 else if (options.value !== undefined) {
@@ -109,11 +109,11 @@
 
                     this.$el.addClass('required');
                 }
-
             };
         },
 
         initialize: function (options) {
+            this.options = options;
             this.extendsBBForm();
             this.schema = options.schema ;
             this.fieldsets = options.fieldsets ;
@@ -125,6 +125,7 @@
             // The template need formname as vrairable, to make it work if several NSForms in the same page
             // With adding formname, there will be no name conflit on Button class
             var variables = { formname: this.name };
+
             if (options.template) {
                 // if a specific template is given, we use it
                 //if ()
@@ -144,12 +145,14 @@
             if (options.autosizeTextArea != null && !options.autosizeTextArea) {
                 this.autosizeTextArea = false;
             }
+
             if (options.id && !isNaN(options.id)) {
                 this.id = options.id;
             }
             else {
                 this.id = 0;
             }
+
             if (options.displayMode) {
                 this.displayMode = options.displayMode;
             }
@@ -163,6 +166,15 @@
             else {
                 this.objectType = null;
             }
+
+            if (options.alloptions)
+            {
+                if (options.alloptions.listofids) {
+                    this.listofids = options.alloptions.listofids;
+                }
+            }
+
+            //----------------------------------------------------
             //this.objectType = options.objecttype;
             //this.displaybuttons();
             if (options.model) {
@@ -184,14 +196,13 @@
                 // allow to redirect after creation (post) using the id of created object
                 this.redirectAfterPost = options.redirectAfterPost;
             }
-
-
         },
 
         initModel: function () {
             var _this = this ;
             if (!this.modelurl){return ;}
             if (this.schema) {
+
                 var Model = Backbone.Model.extend(
                     {
                         urlRoot:this.modelurl,
@@ -205,14 +216,14 @@
                     _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
                     _this.showForm();
                     }
-                }) ;
+                });
             }
             else {
                 this.initModelServeur() ;
             }
 
         },
-        initModelServeur:function() {
+        initModelServeur: function () {
             if (!this.model) {
                 this.model = new Backbone.Model();
             }
@@ -225,12 +236,12 @@
             var url = this.modelurl
             var _this = this;
             url += this.id;
-
+            
             $.ajax({
                 url: url,
                 context: this,
                 type: 'GET',
-                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode },
+                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, SubjectList: this.listofids },
                 dataType: 'json',
                 success: function (resp) {
 
@@ -251,6 +262,16 @@
                     _this.model.urlRoot = this.modelurl;
                     _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
                     _this.showForm();
+
+                    _this.displayDefaultTexts();
+
+                    if (_this.model.attributes.subjects && _this.model.attributes.subjects.length > 1)
+                    {
+                        if (_this.options.origin && _this.options.origin.displayPoolList)
+                        {
+                            _this.options.origin.displayPoolList(_this.model.attributes.subjects);
+                        }
+                    }
                 },
                 error: function (data) {
                     _this.gettingError(data);
@@ -298,51 +319,63 @@
 
 
         displaybuttons: function () {
-            var ctx = this;
+            var that = this;
 
-            $('.NsFormModuleCancel' + ctx.name).unbind();
-            $('.NsFormModuleSave' + ctx.name).unbind();
-            $('.NsFormModuleClear' + ctx.name).unbind();
-            $('.NsFormModuleEdit' + ctx.name).unbind();
+            $('.NsFormModuleCancel' + that.name).unbind();
+            $('.NsFormModuleSave' + that.name).unbind();
+            $('.NsFormModuleClear' + that.name).unbind();
+            $('.NsFormModuleEdit' + that.name).unbind();
+            $('.NsFormModuleDelete' + that.name).unbind();
            
 
-            if (ctx.displayMode == 'edit') {
-                $('.NsFormModuleCancel' + ctx.name).attr('style', 'display:');
-                $('.NsFormModuleSave' + ctx.name).attr('style', 'display:');
-                $('.NsFormModuleClear' + ctx.name).attr('style', 'display:');
-                $('.NsFormModuleEdit' + ctx.name).attr('style', 'display:none');
+            if (that.displayMode == 'edit') {
+                $('.NsFormModuleCancel' + that.name).attr('style', 'display:');
+                $('.NsFormModuleSave' + that.name).attr('style', 'display:');
+                $('.NsFormModuleClear' + that.name).attr('style', 'display:');
+                $('.NsFormModuleEdit' + that.name).attr('style', 'display:none');
+                $('.NsFormModuleDelete' + that.name).attr('style', 'display:none');
                 $('#' + this.formRegion).find('input:enabled:first').focus()
 
             }
             else {
-                $('.NsFormModuleCancel' + ctx.name).attr('style', 'display:none');
-                $('.NsFormModuleSave' + ctx.name).attr('style', 'display:none');
-                $('.NsFormModuleClear' + ctx.name).attr('style', 'display:none');
-                $('.NsFormModuleEdit' + ctx.name).attr('style', 'display:');
+                $('.NsFormModuleCancel' + that.name).attr('style', 'display:none');
+                $('.NsFormModuleSave' + that.name).attr('style', 'display:none');
+                $('.NsFormModuleClear' + that.name).attr('style', 'display:none');
+                $('.NsFormModuleEdit' + that.name).attr('style', 'display:');
+                $('.NsFormModuleDelete' + that.name).attr('style', 'display:');
             }
 
 
-            $('.NsFormModuleSave' + ctx.name).click($.proxy(ctx.butClickSave, ctx));
-            $('.NsFormModuleEdit' + ctx.name).click($.proxy(ctx.butClickEdit, ctx));
-            $('.NsFormModuleClear' + ctx.name).click($.proxy(ctx.butClickClear, ctx));
-            $('.NsFormModuleCancel' + ctx.name).click($.proxy(ctx.butClickCancel, ctx));
-            this.buttonDiplayed();
+            $('.NsFormModuleSave' + that.name).click($.proxy(that.butClickSave, that));
+            $('.NsFormModuleEdit' + that.name).click($.proxy(that.butClickEdit, that));
+            $('.NsFormModuleDelete' + that.name).click($.proxy(that.butClickDelete, that));
+            $('.NsFormModuleClear' + that.name).click($.proxy(that.butClickClear, that));
+            $('.NsFormModuleCancel' + that.name).click($.proxy(that.butClickCancel, that));
+
+            that.buttonDiplayed();
         },
 
         butClickSave: function (e) {
+            console.log("butClickSave", this.model);
 
             var validation = this.BBForm.commit();
-            //console.log('**************************************Validation****************', validation);
             if (validation != null) return;
 
             if (this.model.attributes["id"] == 0) {
-                // To force post when model.save()
                 this.model.attributes["id"] = null;
             }
 
             var _this = this;
-            var _this = this;
+
+            var subjs = this.model.attributes.subjects;
+            if (subjs && subjs.length == 1
+                && subjs[0].toString().indexOf("::") !== -1)
+            {
+                this.model.attributes.subjects = subjs[0].split("::")[0].trim();
+            }
+
             this.onSavingModel();
+
             if (this.model.id == 0) {
                 // New Record
                 this.model.save(null, {
@@ -395,13 +428,88 @@
             this.afterSavingModel();
         },
         butClickEdit: function (e) {
-            e.preventDefault();
-            this.displayMode = 'edit';
-            this.initModel();
-            this.displaybuttons();
 
+        },
+        butClickDelete: function(e) {
+            console.log(this.model, e);
+            var idToDelete = 0;
+            var itemType = "[ItemType]";
+            var apiPath = "[apiPath]";
 
+            if ((this.model.attributes.typeobjname &&
+                this.model.attributes.typeobjname.toLowerCase() == "create")
+                || this.model.attributes.Subjects)
+            {
+                itemType = "Sample";
+                apiPath = itemType;
 
+                if (this.model.attributes.Subjects)
+                {
+                    idToDelete = this.model.attributes.id;
+                }
+
+                if (this.model.attributes.sample)
+                {
+                    idToDelete = this.model.attributes.sample;
+                }
+            }
+            else if (this.model.attributes.sample)
+            {
+                itemType = "Event";
+                apiPath = "EcolEvent";
+
+                if (this.model.attributes.sample)
+                {
+                    idToDelete = this.model.attributes.id;
+                }
+            }
+
+            if (idToDelete > 0) {
+                sweetAlert({
+                    title: "Are you sure?",
+                    text: "The " + itemType + " will be lost!",
+                    type: "warning",
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Keep it",
+                    showCancelButton: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: window.location.origin + '/ecollection/api/' + apiPath.toLowerCase() + '/?itemId=' + idToDelete,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            success: function (resp) {
+                                console.log("success ajax delete sample = ", resp);
+                                if (resp.result) {
+                                    setTimeout(function () {
+                                        sweetAlert({
+                                            title: "Deletion success!",
+                                            text: "The " + itemType + " has successfully been deleted",
+                                            type: "success",
+                                            confirmButtonText: "Understood"
+                                        }, function () {
+                                            window.location.reload();
+                                        });
+                                    }, 100);
+                                }
+                                else if (resp.reason) {
+                                    setTimeout(function () {
+                                        sweetAlert({
+                                            title: 'Deletion error!',
+                                            text: 'Reason:\n' + resp.reason,
+                                            type: "error",
+                                            confirmButtonText: "Understood"
+                                        });
+                                    }, 100);
+                                }
+                            },
+                            error: function (resp) {
+                                console.log("error ajax delete " + itemType + " = ", resp);
+                            }
+                        });
+                    }
+                });
+            }
         },
         butClickCancel: function (e) {
             e.preventDefault();
@@ -446,9 +554,26 @@
 
         },
         buttonDiplayed: function (e) {
+
+        },
+        displayDefaultTexts: function () {
+            var that = this;
+            $.each(this.BBForm.schema, function (index, value) {
+                if (value.type.toLowerCase() == "text")
+                {
+                    var mydefaultValue = "";
+                    var element = $(".formModeEdit [name='"+value.name+"']");
+                    if (element.val() == "")
+                    {
+                        mydefaultValue = value.defaultValue;
+                        if ((mydefaultValue == null || mydefaultValue == "")
+                            && value.options && value.options.defaultValue)
+                            mydefaultValue = value.options.defaultValue
+                        element.val(mydefaultValue);
+                    }
+                }
+            });
         }
-
-
     });
     return NsForm;
 
