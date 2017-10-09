@@ -572,6 +572,27 @@
                         element.val(mydefaultValue);
                     }
                 }
+
+                if (value.type.toLowerCase() == "select")
+                {
+                    var mydefaultValue = "";
+                    var element = $(".formModeEdit [name='" + value.name + "']");
+                    if ((element.val() == "" || element.val() == null) && value.options && value.options.length > 0) {
+
+                        var foundselected = false;
+                        $.each(value.options, function (eachindex, eachvalue) {
+                            if (!foundselected && eachvalue.selected
+                                && eachvalue.selected == "selected")
+                            {
+                                foundselected = true;
+                                mydefaultValue = eachvalue.val;
+                            }
+                        });
+
+                        if (foundselected)
+                            element.val(mydefaultValue);
+                    }
+                }
             });
         }
     });
