@@ -174,6 +174,9 @@
                 }
             }
 
+            if (options.BonusId)
+                this.BonusId = options.BonusId;
+
             //----------------------------------------------------
             //this.objectType = options.objecttype;
             //this.displaybuttons();
@@ -237,11 +240,13 @@
             var _this = this;
             url += this.id;
             
+            console.log("ASKING DAT :", this);
+
             $.ajax({
                 url: url,
                 context: this,
                 type: 'GET',
-                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, SubjectList: this.listofids },
+                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, BonusId: this.BonusId, SubjectList: this.listofids },
                 dataType: 'json',
                 success: function (resp) {
 
@@ -358,8 +363,16 @@
         butClickSave: function (e) {
             console.log("butClickSave", this.model);
 
-            var validation = this.BBForm.commit();
-            if (validation != null) return;
+            var validation = this.BBForm.commit({validate:true});
+            if (validation != null) {
+                sweetAlert({
+                    title: "Error in form",
+                    text: "The form could not be saved ! Some compulsory fields are empty !",
+                    type: "error",
+                    confirmButtonText: "Understood"
+                });
+                return;
+            }
 
             if (this.model.attributes["id"] == 0) {
                 this.model.attributes["id"] = null;
@@ -437,7 +450,7 @@
             var apiPath = "[apiPath]";
 
             if ((this.model.attributes.typeobjname &&
-                this.model.attributes.typeobjname.toLowerCase() == "create")
+                this.model.attributes.typeobjname.toLowerCase() == "created")
                 || this.model.attributes.Subjects)
             {
                 itemType = "Sample";
@@ -475,7 +488,7 @@
                 }, function (isConfirm) {
                     if (isConfirm) {
                         $.ajax({
-                            url: window.location.origin + '/ecollection/api/' + apiPath.toLowerCase() + '/?itemId=' + idToDelete,
+                            url: 'api/' + apiPath.toLowerCase() + '/?itemId=' + idToDelete,
                             type: 'DELETE',
                             dataType: 'json',
                             success: function (resp) {

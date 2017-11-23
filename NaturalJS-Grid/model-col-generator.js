@@ -136,13 +136,5 @@ function (root, colGene, $, _, Backbone, Backgrid, BGSA) {
                 },
             });
         },
-
-
-
-
-
-
-
-
     });
 }));
