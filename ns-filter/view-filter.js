@@ -55,6 +55,19 @@
     + '</form>'
     + '<div class="clear"></div>';
 
+    var tplAdvanced = '<form class="filter form-horizontal filter-form-<%=fieldname%>">'
+        + '<div   class="filterdiv" >'
+    + '<br><span data-editors="Column"></span>'
+        + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
+       + '<span data-editors="ColumnType"></span>'
+
+       + '<span class="col-xs-3" data-editors="Operator"></span>'
+        + '<span class="col-xs-6 filter" data-editors="Value"></span>'
+        + '<span class="advancedIcon icon reneco reneco-add"></span>'
+    + '</div>'
+    + '<div class="clear"></div>'
+    + '</form>'
+    + '<div class="clear"></div>';
 
     var tplcheck =
     '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
@@ -84,9 +97,6 @@
    + '</div>'
    + '</form>'
    
-
-
-
     var tplAdded = '<div class="filter clearfix">'
       + '<div class="clearfix">'
         + '<div class="legend">'
@@ -125,6 +135,14 @@
      + '</div>'
    + '</div>';
 
+
+    var tplOverlay = '<div class="advancedFilterOverlay">'
+                        + '<div class="overlayContentBox">'
+                            + '<div class="overlayTitle">'
+                                + 'Choose a value'
+                            + '</div>'
+                        + '</div>'
+                    + '</div>'
 
     Backbone.Form.validators.INNumber = function (options) {
         return function INNumber(value) {
@@ -165,7 +183,8 @@
     NSFilter = Backbone.View.extend({
 
         events: {
-            "click input": 'clickedCheck'
+            "click input": 'clickedCheck',
+            "click .advancedIcon": 'advancedSearch'
         },
         ToggleFilter: null,
         filterContainer: null,
@@ -292,15 +311,18 @@
                     }
                 }
                 this.getContainer().find("input[type='checkbox']").on('click', this.clickedCheck);
+
                 /*
                 this.getContainer().find("#dateTimePicker").each(function () {
-                    console.log('THGIS', this);
+                    console.log('THIS', this);
                     $(this).datetimepicker();
                 });*/
                 
                 this.forms.push(form);
                 this.filterLoaded();
             };
+
+            this.getContainer().find("span.advancedIcon").on('click', this.advancedSearch);
 
             this.getContainer().keypress(function (e) {                                       
                     
@@ -355,11 +377,19 @@
             var options = this.getValueOptions(dataRow);
             var isInterval = false;
             var operators = null;
+
             if (dataRow.options) {
                 var operators = dataRow.options.operators;
                 if (dataRow.options.isInterval) {
                     isInterval = true;
                 }
+            }
+
+            if (dataRow['advanced'] == true)
+            {
+                // TODO : FOR NOW, ADVANCED FILTERS ONLY APPLY TO SELECT FILTERS
+                if (type.toLowerCase() == 'select')
+                    template = tplAdvanced;
             }
 
             var editorClass = (dataRow['editorClass'] || '') + ' form-control filter';
@@ -368,7 +398,7 @@
                 editorClass += ' list-inline ';
                 options = dataRow['options'];
 
-                if (type == 'Checkboxes') {
+                if (type == 'Checkboxes' && options) {
                     options.splice(0, 0, { label: 'All', val: -1, checked: true });
                     template = tplcheck;
                     editorClass = editorClass.split('form-control').join('');
@@ -645,6 +675,41 @@
                     $(this).prop('checked', IsChecked);
                 });
             }
+        },
+
+        advancedSearch: function (e, it) {
+            // FOR NOW SHOULD ONLY APPLY TO SELECT, UPDATE THIS IF ANOTHER CASE POPS UP WITH
+            // FILTER TYPE CONTEXTUAL UNDERSTANDING
+
+            var $ele = $(e.target);
+            var $topele = $ele.parent();
+            var $options = $topele.find('.filter option');
+
+            $ele.hide();
+
+            setTimeout(function () {
+                if ($options.length > 0) {
+
+                    var overlay = jQuery(tplOverlay);
+                    overlay.appendTo(document.body);
+
+                    $.each($options, function (index, value) {
+                        var optval = $(value).attr("value");
+                        if (optval != "-1")
+                            $(".overlayContentBox").append("<div class='advFilterValue'>" + optval + "</div>")
+                    });
+
+                    $(".advFilterValue").on('click', function () {
+                        var divVal = $(this).text();
+                        $topele.find('.filter select').val(divVal)
+                    });
+
+                    $(".advancedFilterOverlay").on('click', function () {
+                        $(this).remove();
+                        $ele.show();
+                    });
+                }
+            }, 5);
         },
 
         displayFilter: function () {

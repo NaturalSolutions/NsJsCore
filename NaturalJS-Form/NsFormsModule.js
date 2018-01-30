@@ -121,6 +121,8 @@
             this.name = options.name;
             this.buttonRegion = options.buttonRegion  || [];
             this.formRegion = options.formRegion;
+            this.hasFieldsChanged = false;
+
             if (options.reloadAfterSave != null) { this.reloadAfterSave = options.reloadAfterSave };
             // The template need formname as vrairable, to make it work if several NSForms in the same page
             // With adding formname, there will be no name conflit on Button class
@@ -177,6 +179,9 @@
             if (options.BonusId)
                 this.BonusId = options.BonusId;
 
+            if (options.AfterShow)
+                this.AfterShow = options.AfterShow;
+
             //----------------------------------------------------
             //this.objectType = options.objecttype;
             //this.displaybuttons();
@@ -193,6 +198,7 @@
             }
             else {
                 // otherwise, use ajax call to get form information
+                console.log("this.initModel();");
                 this.initModel();
             }
             if (options.redirectAfterPost) {
@@ -222,6 +228,7 @@
                 });
             }
             else {
+                console.log("this.initModelServeur() ;");
                 this.initModelServeur() ;
             }
 
@@ -239,8 +246,6 @@
             var url = this.modelurl
             var _this = this;
             url += this.id;
-            
-            console.log("ASKING DAT :", this);
 
             $.ajax({
                 url: url,
@@ -266,6 +271,8 @@
                     // give the url to model to manage save
                     _this.model.urlRoot = this.modelurl;
                     _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
+
+                    console.log("_this.showForm();");
                     _this.showForm();
 
                     _this.displayDefaultTexts();
@@ -291,6 +298,7 @@
             this.BBForm.render();
             this.render();
 
+            console.log("this.BeforeShow();");
             // Call extendable function before the show call
             this.BeforeShow();
             var _this = this;
@@ -317,9 +325,14 @@
                     autosize($('textarea'));
                 }, 0);
             }
+
+            // TODO, should not be here
+            $('.form-control').on('change', this.formControlChange);
+            this.AfterShow();
         },
+
         AfterShow: function () {
-            // to be extended
+            console.log("after show !");
         },
 
 
@@ -361,7 +374,6 @@
         },
 
         butClickSave: function (e) {
-            console.log("butClickSave", this.model);
 
             var validation = this.BBForm.commit({validate:true});
             if (validation != null) {
@@ -444,7 +456,6 @@
 
         },
         butClickDelete: function(e) {
-            console.log(this.model, e);
             var idToDelete = 0;
             var itemType = "[ItemType]";
             var apiPath = "[apiPath]";
@@ -572,10 +583,10 @@
         displayDefaultTexts: function () {
             var that = this;
             $.each(this.BBForm.schema, function (index, value) {
+                var element = $(".formModeEdit [name='" + value.name + "']");
                 if (value.type.toLowerCase() == "text")
                 {
                     var mydefaultValue = "";
-                    var element = $(".formModeEdit [name='"+value.name+"']");
                     if (element.val() == "")
                     {
                         mydefaultValue = value.defaultValue;
@@ -589,7 +600,6 @@
                 if (value.type.toLowerCase() == "select")
                 {
                     var mydefaultValue = "";
-                    var element = $(".formModeEdit [name='" + value.name + "']");
                     if ((element.val() == "" || element.val() == null) && value.options && value.options.length > 0) {
 
                         var foundselected = false;
@@ -606,7 +616,19 @@
                             element.val(mydefaultValue);
                     }
                 }
+
+                if (value.type.toLowerCase() == "checkbox")
+                {
+                    if (value.options && value.options.defaultValue)
+                    {
+                        element.prop('checked', true);
+                    }
+                }
             });
+        },
+
+        formControlChange: function () {
+            this.hasFieldsChanged = true;
         }
     });
     return NsForm;
