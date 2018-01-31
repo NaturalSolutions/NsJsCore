@@ -40,7 +40,8 @@
     }
 
 }(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize) {
- var tpl = '<div id="NsFormButton">' 
+    console.log(window.currentUser);
+    var tpl = '<div id="NsFormButton">'
      +'<button class="NsFormModuleCancel<%=formname%>">'
      + 'Cancel '
     +'</button>'
