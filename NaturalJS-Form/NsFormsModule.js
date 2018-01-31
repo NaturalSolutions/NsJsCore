@@ -121,7 +121,8 @@
             this.name = options.name;
             this.buttonRegion = options.buttonRegion  || [];
             this.formRegion = options.formRegion;
-            this.hasFieldsChanged = false;
+            //HAS PROVEN USELESS -> this.hasFieldsChanged = false;
+            this.that = this;
 
             if (options.reloadAfterSave != null) { this.reloadAfterSave = options.reloadAfterSave };
             // The template need formname as vrairable, to make it work if several NSForms in the same page
@@ -198,7 +199,6 @@
             }
             else {
                 // otherwise, use ajax call to get form information
-                console.log("this.initModel();");
                 this.initModel();
             }
             if (options.redirectAfterPost) {
@@ -228,7 +228,6 @@
                 });
             }
             else {
-                console.log("this.initModelServeur() ;");
                 this.initModelServeur() ;
             }
 
@@ -272,7 +271,6 @@
                     _this.model.urlRoot = this.modelurl;
                     _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
 
-                    console.log("_this.showForm();");
                     _this.showForm();
 
                     _this.displayDefaultTexts();
@@ -298,7 +296,6 @@
             this.BBForm.render();
             this.render();
 
-            console.log("this.BeforeShow();");
             // Call extendable function before the show call
             this.BeforeShow();
             var _this = this;
@@ -318,7 +315,6 @@
                 }
             });
 
-
             this.displaybuttons();
             if (this.autosizeTextArea) {
                 setTimeout(function () {
@@ -332,7 +328,7 @@
         },
 
         AfterShow: function () {
-            console.log("after show !");
+
         },
 
 
@@ -628,7 +624,7 @@
         },
 
         formControlChange: function () {
-            this.hasFieldsChanged = true;
+            $(this).addClass("haschanged");
         }
     });
     return NsForm;
