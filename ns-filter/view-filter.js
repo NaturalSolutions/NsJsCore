@@ -314,7 +314,6 @@
 
                 /*
                 this.getContainer().find("#dateTimePicker").each(function () {
-                    console.log('THIS', this);
                     $(this).datetimepicker();
                 });*/
                 
@@ -327,7 +326,6 @@
             this.getContainer().keypress(function (e) {                                       
                     
                     if (e.which == 13) {
-                        //console.log('keypressed') ;
                         e.preventDefault();
                         _this.update() ;
                         //do something   
@@ -420,10 +418,8 @@
             }
             /*
             form.$el.find(".dateTimePicker").each(function () {
-                console.log('THGIS', this);
                 $(this).datetimepicker();
             });*/
-            //console.log(form.model);
             return form;
         },
         getBBFormFromFilter: function (dataRow, editorClass, type, operators, template, indice) {
@@ -744,24 +740,23 @@
             var operatorsOptions;
             switch (type) {
                 case "Text": case "AutocompTreeEditor": case "AutocompleteEditor":
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }, ];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is not null' },{ label: 'Is not null', val: 'is null' }];
                     break;
                 case "DateTimePickerEditor":
                     //return operatorsOptions = [{ label: '<', val: '<' }, { label: '>', val: '>' }, { label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }];
                     return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='}];
                     break;
                 case "Select":
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Is null', val: 'is not null' }, { label: 'Is not null', val: 'is null' }];
                     break;
                 case "Checkboxes":
                     return operatorsOptions = [{ label: 'Checked', val: 'Checked' }];
                     break;
-                    break;
                 case "Number":
-                    return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='}, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
+                    return operatorsOptions = [{ label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<', val: '<' }, { label: '>', val: '>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is not null' }, { label: 'Is not null', val: 'is null' }];
                     break;
                 default:
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }, ];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is not null' }, { label: 'Is not null', val: 'is null' }];
                     break;
             }
         },
@@ -795,15 +790,14 @@
 
                     }
                     else {
-                        if (value.Value) {
+                        var skipCases = ["is null", "is not null"];
+                        if (value.Value ||
+                            (value.Operator && skipCases.indexOf(value.Operator.toLowerCase()) != -1)) {
                             this.criterias.push(value);
                             currentForm.$el.find('input.filter').addClass('active');
                         }
                     }
                     // TODO Gestion interval
-
-
-
                 }
             }
             if (this.clientSide != null) {

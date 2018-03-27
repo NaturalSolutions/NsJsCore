@@ -40,7 +40,7 @@
     }
 
 }(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize) {
-    console.log(window.currentUser);
+
     var tpl = '<div id="NsFormButton">'
      +'<button class="NsFormModuleCancel<%=formname%>">'
      + 'Cancel '
@@ -325,13 +325,14 @@
 
             // TODO, should not be here
             $('.form-control').on('change', this.formControlChange);
+            $('.autocompTree').on('click', this.formControlChange);
+
             this.AfterShow();
         },
 
         AfterShow: function () {
 
         },
-
 
         displaybuttons: function () {
             var that = this;
@@ -342,7 +343,6 @@
             $('.NsFormModuleEdit' + that.name).unbind();
             $('.NsFormModuleDelete' + that.name).unbind();
            
-
             if (that.displayMode == 'edit') {
                 $('.NsFormModuleCancel' + that.name).attr('style', 'display:');
                 $('.NsFormModuleSave' + that.name).attr('style', 'display:');
@@ -360,7 +360,6 @@
                 $('.NsFormModuleDelete' + that.name).attr('style', 'display:');
             }
 
-
             $('.NsFormModuleSave' + that.name).click($.proxy(that.butClickSave, that));
             $('.NsFormModuleEdit' + that.name).click($.proxy(that.butClickEdit, that));
             $('.NsFormModuleDelete' + that.name).click($.proxy(that.butClickDelete, that));
@@ -371,7 +370,6 @@
         },
 
         butClickSave: function (e) {
-
             var validation = this.BBForm.commit({validate:true});
             if (validation != null) {
                 sweetAlert({
@@ -430,7 +428,6 @@
                     error: function (model,response) {
                         _this.savingError(model, response);
                     }
-
                 });
             }
             else {
@@ -449,9 +446,11 @@
             }
             this.afterSavingModel();
         },
+
         butClickEdit: function (e) {
 
         },
+
         butClickDelete: function(e) {
             var idToDelete = 0;
             var itemType = "[ItemType]";
@@ -500,7 +499,6 @@
                             type: 'DELETE',
                             dataType: 'json',
                             success: function (resp) {
-                                console.log("success ajax delete sample = ", resp);
                                 if (resp.result) {
                                     setTimeout(function () {
                                         sweetAlert({
@@ -532,12 +530,14 @@
                 });
             }
         },
+
         butClickCancel: function (e) {
             e.preventDefault();
             this.displayMode = 'display';
             this.initModel();
             this.displaybuttons();
         },
+
         butClickClear: function (e) {
             var formContent = this.BBForm.el;
             $(formContent).find('input').val('');
@@ -545,6 +545,7 @@
             $(formContent).find('textarea').val('');
             $(formContent).find('input[type="checkbox"]').attr('checked', false);
         },
+
         reloadingAfterSave: function () {
             this.displayMode = 'display';
             // reaload created record from AJAX Call
@@ -552,6 +553,7 @@
             this.showForm();
             this.displaybuttons();
         },
+
         onSavingModel: function () {
             // To be extended, calld after commit before save on model
         },
@@ -559,6 +561,7 @@
         afterSavingModel: function () {
             // To be extended called after model.save()
         },
+
         BeforeShow: function () {
             // to be extended called after render, before the show function
         },
@@ -566,6 +569,7 @@
         savingSuccess: function (model, response) {
             // To be extended, called after save on model if success
         },
+
         savingError: function (model, response) {
             // To be extended, called after save on model if error
         },
@@ -574,9 +578,11 @@
             // To be extended, called when initializing model failed
 
         },
+
         buttonDiplayed: function (e) {
 
         },
+
         displayDefaultTexts: function () {
             var that = this;
             $.each(this.BBForm.schema, function (index, value) {

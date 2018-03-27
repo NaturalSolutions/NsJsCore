@@ -24,7 +24,6 @@
         // Export global even in AMD case in case this script is loaded with
         // others that may still expect a global Backbone.
         var Retour = factory(root, exports, $, _, Backbone, Backgrid, PageColl, Paginator, colGene);
-        //console.log(Retour);
         return Retour;
     });
 
@@ -245,8 +244,6 @@
             this.listenTo(this.collection, "reset", this.affectTotalRecords);
         },
 
-
-
         initCollectionPaginableClient: function () {
             var _this = this;
             var PageCollection = PageColl.extend({
@@ -291,8 +288,6 @@
 
             this.grid.insertColumn(poolcolumn);
 
-            console.log("INSERTED POOL COLUMN", this.grid);
-
             */
 
             if (!this.coll) {
@@ -305,8 +300,6 @@
 
             this.affectTotalRecords();
             if (!jQuery.isEmptyObject(this.sortCriteria)) {
-                //console.log($('th'));
-
                 for (var key in this.sortCriteria) {
                     $('th.' + key).addClass(this.sortCriteria[key]);
                 }
@@ -323,7 +316,6 @@
             this.CollectionLoaded(options);
         },
         CollectionLoaded: function (options) {
-            //console.log('ColeectionLoaded');
 
         },
         update: function (args) {
@@ -331,7 +323,6 @@
                 this.grid.collection.state.currentPage = 1;
                 this.grid.collection.searchCriteria = args.filters;
                 this.fetchCollection({ init: false });
-
             }
             else {
                 this.filterCriteria = JSON.stringify(args.filters);
@@ -420,7 +411,6 @@
                     break;
                 case 'rowDblClicked':
                     if (this.rowDblClickedInfo) {
-                        console.log('*************DOUBLE CLICK ave info************', this.rowDblClickedInfo);
                         this.rowDblClickedInfo.clickFunction(params, this.rowDblClickedInfo.parent);
                     }
                     break;

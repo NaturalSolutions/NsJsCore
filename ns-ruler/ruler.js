@@ -71,17 +71,12 @@
             else {
                 this.sourceFields[source].push({ target: target, operator: operator });
             }
-            //console.log('ADD Rule', this.sourceFields, this.sourceFields[source], this.sourceFields[source].length);
 
             this.form.$el.find(('#' + this.getEditor(source).id)).on('change keyup paste', function (e) {
                 _this.ApplyRules(e);
             });
             
             //this.form.$el.find(('#' + this.getEditor(source).id)).keypress(this.ApplyRules);
-
-            
-            //console.log('Editor', this.form.$el.find(('#' + this.getEditor(source).id)), this.getEditor(source).id,this.sourceFields);
-            
         },
         getEditor: function (name) {
             return this.form.fields[name].editor;

@@ -23,11 +23,11 @@
             //  Callbacks
 
             //  We set an useless default li click event callback
-            liClickEvent : function(liValue, origin, tooltip) {
-                console.log ("Li clicked, value : ", liValue);
+            liClickEvent: function (liValue, origin, tooltip) {
+
             },
             searchEnter: function (searchedValue) {
-                console.log("Search enter, value : ", searchedValue);
+
             },
             searchPlaceholder : ""
         }, options);
