@@ -107,7 +107,6 @@
                 if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
                 if (options.schema.validators && options.schema.validators[0] == "required") {
-
                     this.$el.addClass('required');
                 }
             };
@@ -331,7 +330,7 @@
         },
 
         AfterShow: function () {
-
+            //THIS FUNCTION HAS PROVEN USELESS IN MANY OCCASIONS ... (NEVER CALLED ?)
         },
 
         displaybuttons: function () {
@@ -401,7 +400,7 @@
                 this.model.save(null, {
 
                     success: function (model, response) {
-                        // Getting ID of created record, from the model (has beeen affected during model.save in the response)
+                        // Getting ID of created record, from the model (has been affected during model.save in the response)
                         _this.savingSuccess(model, response);
                         _this.id = _this.model.id;
 
@@ -473,16 +472,16 @@
                     idToDelete = this.model.attributes.sample;
                 }
             }
-            else if (this.model.attributes.sample)
+
+            if (this.model.attributes.sample)
             {
                 itemType = "Event";
                 apiPath = "EcolEvent";
 
-                if (this.model.attributes.sample)
-                {
-                    idToDelete = this.model.attributes.id;
-                }
+                idToDelete = this.model.attributes.id;
             }
+
+            console.log(this, this.model, this.model.attributes);
 
             if (idToDelete > 0) {
                 sweetAlert({
@@ -523,7 +522,14 @@
                                 }
                             },
                             error: function (resp) {
-                                console.log("error ajax delete " + itemType + " = ", resp);
+                                setTimeout(function () {
+                                    sweetAlert({
+                                        title: 'Deletion error!',
+                                        text: 'Reason:\n' + resp.responseText,
+                                        type: "error",
+                                        confirmButtonText: "Understood"
+                                    });
+                                }, 100);
                             }
                         });
                     }
@@ -563,7 +569,7 @@
         },
 
         BeforeShow: function () {
-            // to be extended called after render, before the show function
+            // to be extended called after render, before the show function            
         },
 
         savingSuccess: function (model, response) {
