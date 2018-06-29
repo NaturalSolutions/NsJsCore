@@ -272,7 +272,6 @@
                     _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
 
                     _this.showForm();
-
                     _this.displayDefaultTexts();
 
                     if (_this.model.attributes.subjects && _this.model.attributes.subjects.length > 1)
@@ -322,9 +321,21 @@
                 }, 0);
             }
 
+            console.log(this, this.BBForm);
+
             // TODO, should not be here
             $('.form-control').on('change', this.formControlChange);
+            $('.dateTimePicker').on('dp.change', this.formControlChange);
             $('.autocompTree').on('click', this.formControlChange);
+
+            $('.dateTimePicker').trigger('dp.change');
+
+            $.each($(".formContainer fieldset>div"), function (index, value) {
+                if ($(value).find(".HiddenInput").length > 0)
+                    $(value).addClass("HiddenInputParent");
+                if ($(value).find(".ReadOnlyInput").length > 0)
+                    $(value).addClass("ReadOnlyInputParent");
+            });
 
             this.AfterShow();
         },
@@ -481,8 +492,6 @@
                 idToDelete = this.model.attributes.id;
             }
 
-            console.log(this, this.model, this.model.attributes);
-
             if (idToDelete > 0) {
                 sweetAlert({
                     title: "Are you sure?",
@@ -506,7 +515,7 @@
                                             type: "success",
                                             confirmButtonText: "Understood"
                                         }, function () {
-                                            window.location.reload();
+                                            window.location.replace(window.location.href.split('?')[0]);
                                         });
                                     }, 100);
                                 }
@@ -589,55 +598,90 @@
 
         },
 
-        displayDefaultTexts: function () {
+        defaultTextsFormSchema: function (schema)
+        {
             var that = this;
-            $.each(this.BBForm.schema, function (index, value) {
-                var element = $(".formModeEdit [name='" + value.name + "']");
-                if (value.type.toLowerCase() == "text")
-                {
-                    var mydefaultValue = "";
-                    if (element.val() == "")
-                    {
-                        mydefaultValue = value.defaultValue;
-                        if ((mydefaultValue == null || mydefaultValue == "")
-                            && value.options && value.options.defaultValue)
-                            mydefaultValue = value.options.defaultValue
-                        element.val(mydefaultValue);
-                    }
-                }
 
-                if (value.type.toLowerCase() == "select")
-                {
-                    var mydefaultValue = "";
-                    if ((element.val() == "" || element.val() == null) && value.options && value.options.length > 0) {
+            $.each(schema, function (index, value) {
+                var element = $(".formModeEdit [name='" + value.name + "']:last");
 
-                        var foundselected = false;
-                        $.each(value.options, function (eachindex, eachvalue) {
-                            if (!foundselected && eachvalue.selected
-                                && eachvalue.selected == "selected")
-                            {
-                                foundselected = true;
-                                mydefaultValue = eachvalue.val;
-                            }
-                        });
-
-                        if (foundselected)
+                switch (value.type.toLowerCase()) {
+                    case "text":
+                        var mydefaultValue = "";
+                        if (element.val() == "") {
+                            mydefaultValue = value.defaultValue;
+                            if ((mydefaultValue == null || mydefaultValue == "")
+                                && value.options && value.options.defaultValue)
+                                mydefaultValue = value.options.defaultValue
                             element.val(mydefaultValue);
-                    }
+                        }
+
+                        break;
+
+                    case "select":
+                        var mydefaultValue = "";
+                        if ((element.val() == "" || element.val() == null) && value.options && value.options.length > 0) {
+
+                            var foundselected = false;
+                            $.each(value.options, function (eachindex, eachvalue) {
+                                if (!foundselected && eachvalue.selected
+                                    && eachvalue.selected == "selected") {
+                                    foundselected = true;
+                                    mydefaultValue = eachvalue.val;
+                                }
+                            });
+
+                            if (foundselected)
+                                element.val(mydefaultValue);
+                        }
+
+                        break;
+
+                    case "checkbox":
+
+                        if (value.options && value.options.defaultValue) {
+                            element.prop('checked', true);
+                        }
+
+                        break;
+
+                        //TODO FIND A WAY TO APPLY ONLY ON CREATE, NOT ON EDIT AND IF DEFAULT VALUE IS NOT FORCED AT 0
+                        //console.log("*********", this);
+                    case "number":
+                        if (value.options && value.options.defaultValue) {
+                            if (element.val() == 0)
+                                element.val(value.options.defaultValue);
+                        }
+                        else if (element.val() == 0) {
+                            element.val("");
+                        }
+                        break;
+
+                    case "listofsubforms":
+                        that.defaultTextsFormSchema(value.subschema);
+                        break;
                 }
 
-                if (value.type.toLowerCase() == "checkbox")
-                {
-                    if (value.options && value.options.defaultValue)
-                    {
-                        element.prop('checked', true);
-                    }
-                }
             });
         },
 
-        formControlChange: function () {
+        displayDefaultTexts: function () {
+
+            this.defaultTextsFormSchema(this.BBForm.schema);
+
+        },
+
+        formControlChange: function (evt) {
             $(this).addClass("haschanged");
+            var target = evt.target;
+            if (target.id == "dateTimePicker") {
+                var fromdate = $(this).find("input").val().split("/");
+                var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
+                var idyear = $("input[name='identificationyear']");
+                if (idyear.length > 0) {
+                    idyear.val(dateyear);
+                }
+            }
         }
     });
     return NsForm;

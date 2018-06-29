@@ -740,23 +740,23 @@
             var operatorsOptions;
             switch (type) {
                 case "Text": case "AutocompTreeEditor": case "AutocompleteEditor":
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is not null' },{ label: 'Is not null', val: 'is null' }];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
                     break;
                 case "DateTimePickerEditor":
                     //return operatorsOptions = [{ label: '<', val: '<' }, { label: '>', val: '>' }, { label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }];
                     return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='}];
                     break;
                 case "Select":
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Is null', val: 'is not null' }, { label: 'Is not null', val: 'is null' }];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Is null', val: 'is null' }, { label: 'Is not null', val: 'is not null' }];
                     break;
                 case "Checkboxes":
                     return operatorsOptions = [{ label: 'Checked', val: 'Checked' }];
                     break;
                 case "Number":
-                    return operatorsOptions = [{ label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<', val: '<' }, { label: '>', val: '>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is not null' }, { label: 'Is not null', val: 'is null' }];
+                    return operatorsOptions = [{ label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<', val: '<' }, { label: '>', val: '>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is null' }, { label: 'Is not null', val: 'is not null' }];
                     break;
                 default:
-                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is not null' }, { label: 'Is not null', val: 'is null' }];
+                    return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is null' }, { label: 'Is not null', val: 'is not null' }];
                     break;
             }
         },
