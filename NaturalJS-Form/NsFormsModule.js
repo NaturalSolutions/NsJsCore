@@ -321,8 +321,6 @@
                 }, 0);
             }
 
-            console.log(this, this.BBForm);
-
             // TODO, should not be here
             $('.form-control').on('change', this.formControlChange);
             $('.dateTimePicker').on('dp.change', this.formControlChange);
@@ -449,8 +447,8 @@
                             _this.reloadingAfterSave();
                         }
                     },
-                    error: function (response) {
-                        _this.savingError(response);
+                    error: function (model, response) {
+                        _this.savingError(model, response);
                     }
                 });
             }

@@ -145,6 +145,21 @@
 
             this.initGrid();
             this.eventHandler();
+            
+            // TODO - THIS IS AWFUL TIMEOUT ...
+            // I WAS TOO LAZY TO KEEP ON SEARCHING WHERE THIS NEEDS TO BE
+            // TRIED "view-filter.js", didnt work ...
+            // THIS IS MADE TO PREVENT DBLCLICK REDIRECT (NATIVE ? BBFORM ?) FROM DATETIMEPICKER CALENDER
+            // WILL MOVE IT TO THE RIGHT PLACE AS SOON AS I'LL HAVE FREE TIME
+            setTimeout(function () {
+                $(".dateTimePicker .input-group-addon").on("click", function (e) {
+                    $(e.target).parent().parent().find(".dropdown-menu").on("dblclick", function (se) {
+                        se.preventDefault()
+                        return (false);
+                    });
+                });
+            }, 1000);
+
         },
 
         setHeaderCell: function () {
