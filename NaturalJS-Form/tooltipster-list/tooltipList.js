@@ -134,7 +134,9 @@
 
             functionAfter: function (origin, tooltip) {
                 // When the mouse move out of the tooltip we destroy otherwise the tooltip is trigger when we hover the button
-                $(origin).tooltipster('destroy');
+                console.log($(origin), $(origin).tooltipster);
+                //if ($(origin).length > 0 && $(origin).tooltipster)
+                //    $(origin).tooltipster('destroy');
             }
 
         });

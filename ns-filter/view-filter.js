@@ -402,7 +402,7 @@
                     editorClass = editorClass.split('form-control').join('');
                 }
                 else if (type == 'Select') {
-                    dataRow['options'].splice(0, 0, { label: ' ', val: -1 });
+                    //dataRow['options'].splice(0, 0, { label: ' ', val: -1 });
                 }
             }
 

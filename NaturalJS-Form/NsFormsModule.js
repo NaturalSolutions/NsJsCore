@@ -183,6 +183,9 @@
             if (options.AfterShow)
                 this.AfterShow = options.AfterShow;
 
+            if (options.Secondary)
+                this.Secondary = options.Secondary;
+
             //----------------------------------------------------
             //this.objectType = options.objecttype;
             //this.displaybuttons();
@@ -250,7 +253,7 @@
                 url: url,
                 context: this,
                 type: 'GET',
-                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, BonusId: this.BonusId, SubjectList: this.listofids },
+                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, BonusId: this.BonusId, SubjectList: this.listofids, Secondary: this.Secondary },
                 dataType: 'json',
                 success: function (resp) {
 
@@ -638,7 +641,9 @@
                     case "checkbox":
 
                         if (value.options && value.options.defaultValue) {
-                            element.prop('checked', true);
+                            var defval = value.options.defaultValue
+                            if (defval == 1 || defval == '1' || defval == 'true')
+                                element.prop('checked', true);
                         }
 
                         break;
