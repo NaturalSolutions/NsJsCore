@@ -177,8 +177,8 @@
                 }
             }
 
-            if (options.BonusId)
-                this.BonusId = options.BonusId;
+            if (options.MainObjectId)
+                this.MainObjectId = options.MainObjectId;
 
             if (options.AfterShow)
                 this.AfterShow = options.AfterShow;
@@ -253,7 +253,7 @@
                 url: url,
                 context: this,
                 type: 'GET',
-                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, BonusId: this.BonusId, SubjectList: this.listofids, Secondary: this.Secondary },
+                data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, MainObjectId: this.MainObjectId, SubjectList: this.listofids, Secondary: this.Secondary },
                 dataType: 'json',
                 success: function (resp) {
 
@@ -300,15 +300,11 @@
 
             // Call extendable function before the show call
             this.BeforeShow();
-            var _this = this;
             $('#' + this.formRegion).html(this.BBForm.el);
-
-
 
             this.buttonRegion.forEach(function (entry) {
                 $('#' + entry).html(_this.template);
             });
-
 
             $('#' + this.formRegion).find('input').on("keypress", function (e) {
                 if (e.which == 13) {
@@ -325,9 +321,9 @@
             }
 
             // TODO, should not be here
-            $('.form-control').on('change', this.formControlChange);
-            $('.dateTimePicker').on('dp.change', this.formControlChange);
-            $('.autocompTree').on('click', this.formControlChange);
+            $('.form-control').on('change', function (evt) { _this.formControlChange(evt, _this); });
+            $('.dateTimePicker').on('dp.change', function (evt) { _this.formControlChange(evt, _this); });
+            $('.autocompTree').on('click', function (evt) { _this.formControlChange(evt, _this); });
 
             $('.dateTimePicker').trigger('dp.change');
 
@@ -381,7 +377,38 @@
         },
 
         butClickSave: function (e) {
-            var validation = this.BBForm.commit({validate:true});
+            var that = this;
+            var savedModel = [];
+
+            /* TODO : For some reasons, BBForms COMMIT modifies dates values ...
+                    This whole scope is temporarily here to prevent dates from being modified ...
+                    */
+            $.each(this.BBForm.model.attributes, function (index, value) {
+                if (value)
+                {
+                    if (value.toString().indexOf("/") != -1) {
+                        var splittedDate = value.split("/");
+                        if (splittedDate.length == 3)
+                        {
+                            value = new Date(splittedDate[2], splittedDate[1] - 1, splittedDate[0]);
+                            value.setHours(value.getHours() + 2);
+                            value = value.toJSON();
+                        }
+                    }
+                    else if (value.toString().indexOf("-") != -1 &&
+                    value.toString().indexOf(":") != -1 &&
+                    value.toString().indexOf("T") != -1)
+                    {
+                        value = new Date(value);
+                        value.setHours(value.getHours() + 2);
+                        value = value.toJSON();
+                    }
+                }
+                
+                savedModel.push({ 'index': index, 'value': value });
+            });
+
+            var validation = this.BBForm.commit();
             if (validation != null) {
                 sweetAlert({
                     title: "Error in form",
@@ -391,6 +418,11 @@
                 });
                 return;
             }
+
+            $.each(savedModel, function (index, value) {
+                if (value.index != "editiondate")
+                    that.BBForm.model.attributes[value.index] = value.value;
+            });
 
             if (this.model.attributes["id"] == 0) {
                 this.model.attributes["id"] = null;
@@ -462,7 +494,10 @@
 
         },
 
-        butClickDelete: function(e) {
+        butClickDelete: function (e, env, skipConfirm) {
+            if (env)
+                this.model = env.model;
+
             var idToDelete = 0;
             var itemType = "[ItemType]";
             var apiPath = "[apiPath]";
@@ -493,7 +528,57 @@
                 idToDelete = this.model.attributes.id;
             }
 
-            if (idToDelete > 0) {
+            var confirmDeletion = function(isConfirm){
+                if (isConfirm) {
+                    $.ajax({
+                        url: 'api/' + apiPath.toLowerCase() + '/?itemId=' + idToDelete,
+                        type: 'DELETE',
+                        dataType: 'json',
+                        success: function (resp) {
+                            if (resp.result) {
+                                setTimeout(function () {
+                                    sweetAlert({
+                                        title: "Deletion success!",
+                                        text: "The " + itemType + " has successfully been deleted",
+                                        type: "success",
+                                        confirmButtonText: "Understood"
+                                    }, function () {
+                                        var newLoc = (window.location.href.split('?')[0]);
+                                        if (window.location.href == newLoc)
+                                            window.location.reload();
+                                        else
+                                            window.location.href = newLoc;
+                                    });
+                                }, 100);
+                            }
+                            else if (resp.reason) {
+                                setTimeout(function () {
+                                    sweetAlert({
+                                        title: 'Deletion error!',
+                                        text: 'Reason:\n' + resp.reason,
+                                        type: "error",
+                                        confirmButtonText: "Understood"
+                                    });
+                                }, 100);
+                            }
+                        },
+                        error: function (resp) {
+                            setTimeout(function () {
+                                sweetAlert({
+                                    title: 'Deletion error!',
+                                    text: 'Reason:\n' + resp.responseText,
+                                    type: "error",
+                                    confirmButtonText: "Understood"
+                                });
+                            }, 100);
+                        }
+                    });
+                }
+            };
+
+            if (skipConfirm)
+                confirmDeletion(true);
+            else if (idToDelete > 0) {
                 sweetAlert({
                     title: "Are you sure?",
                     text: "The " + itemType + " will be lost!",
@@ -501,49 +586,7 @@
                     confirmButtonText: "Delete",
                     cancelButtonText: "Keep it",
                     showCancelButton: true
-                }, function (isConfirm) {
-                    if (isConfirm) {
-                        $.ajax({
-                            url: 'api/' + apiPath.toLowerCase() + '/?itemId=' + idToDelete,
-                            type: 'DELETE',
-                            dataType: 'json',
-                            success: function (resp) {
-                                if (resp.result) {
-                                    setTimeout(function () {
-                                        sweetAlert({
-                                            title: "Deletion success!",
-                                            text: "The " + itemType + " has successfully been deleted",
-                                            type: "success",
-                                            confirmButtonText: "Understood"
-                                        }, function () {
-                                            window.location.replace(window.location.href.split('?')[0]);
-                                        });
-                                    }, 100);
-                                }
-                                else if (resp.reason) {
-                                    setTimeout(function () {
-                                        sweetAlert({
-                                            title: 'Deletion error!',
-                                            text: 'Reason:\n' + resp.reason,
-                                            type: "error",
-                                            confirmButtonText: "Understood"
-                                        });
-                                    }, 100);
-                                }
-                            },
-                            error: function (resp) {
-                                setTimeout(function () {
-                                    sweetAlert({
-                                        title: 'Deletion error!',
-                                        text: 'Reason:\n' + resp.responseText,
-                                        type: "error",
-                                        confirmButtonText: "Understood"
-                                    });
-                                }, 100);
-                            }
-                        });
-                    }
-                });
+                }, confirmDeletion);
             }
         },
 
@@ -674,15 +717,32 @@
 
         },
 
-        formControlChange: function (evt) {
+        //TODO : THIS SHOULD BE IN GENFORM, NOT IN NSFORMSMODULE !!!
+        formControlChange: function (evt, context) {
+            var that = context;
+
+            /* NOT WORKING ...
             $(this).addClass("haschanged");
             var target = evt.target;
-            if (target.id == "dateTimePicker") {
-                var fromdate = $(this).find("input").val().split("/");
-                var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
-                var idyear = $("input[name='identificationyear']");
+            if (target.id == "dateTimePicker" && $(target).find("input[name='eventdate']").length > 0) {
+                var idyear = $("#EColEventForm input[name='identificationyear']");
                 if (idyear.length > 0) {
+                    var fromdate = $(this).find("input").val().split("/");
+                    var dateyear = new Date(fromdate[2], '0', '1');
+                    $(idyear).val(dateyear);
+
+            */
+
+            $(this).addClass("haschanged");
+            var target = evt.target;
+            if (target.id == "dateTimePicker" && $(target).find("input[name='eventdate']").length > 0) {
+                var idyear = $("#EColEventForm input[name='identificationyear']");
+                if (idyear.length > 0) {
+                    var fromdate = $(target).find("input").val().split("/");
+                    var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
                     idyear.val(dateyear);
+                    $(idyear).attr("value", "01/01/" + dateyear);
+                    that.model.attributes.identificationyear = new Date(fromdate[2], 0, 1, 1);
                 }
             }
         }
