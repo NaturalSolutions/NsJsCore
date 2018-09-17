@@ -378,11 +378,12 @@
 
         butClickSave: function (e) {
             var that = this;
-            var savedModel = [];
 
-            /* TODO : For some reasons, BBForms COMMIT modifies dates values ...
+            // EDIT : Now DEPRECATED 
+            /*var savedModel = [];
+             TODO : For some reasons, BBForms COMMIT modifies dates values ...
                     This whole scope is temporarily here to prevent dates from being modified ...
-                    */
+                    
             $.each(this.BBForm.model.attributes, function (index, value) {
                 if (value)
                 {
@@ -407,7 +408,7 @@
                 
                 savedModel.push({ 'index': index, 'value': value });
             });
-
+            */
             var validation = this.BBForm.commit();
             if (validation != null) {
                 sweetAlert({
@@ -418,11 +419,15 @@
                 });
                 return;
             }
-
+            // EDIT : Now DEPRECATED
+            /*
             $.each(savedModel, function (index, value) {
-                if (value.index != "editiondate")
-                    that.BBForm.model.attributes[value.index] = value.value;
+                console.log("savedModel", index, value, that.BBForm.model.attributes[value.index]);
+                if (value.index != "editiondate") {
+                    //that.BBForm.model.attributes[value.index] = value.value;
+                }
             });
+            */
 
             if (this.model.attributes["id"] == 0) {
                 this.model.attributes["id"] = null;
@@ -734,17 +739,29 @@
             */
 
             $(this).addClass("haschanged");
+
+            if ($(this).closest(".subformArea") != null)
+            {
+                $(this).closest(".subformArea").addClass("haschanged");
+            }
+
             var target = evt.target;
-            if (target.id == "dateTimePicker" && $(target).find("input[name='eventdate']").length > 0) {
-                var idyear = $("#EColEventForm input[name='identificationyear']");
-                if (idyear.length > 0) {
-                    var fromdate = $(target).find("input").val().split("/");
-                    var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
-                    idyear.val(dateyear);
-                    $(idyear).attr("value", "01/01/" + dateyear);
-                    that.model.attributes.identificationyear = new Date(fromdate[2], 0, 1, 1);
+
+            if (target.id == "dateTimePicker")
+            {
+                if ($(target).find("input[name='eventdate']").length > 0) {
+                    var idyear = $("#EColEventForm input[name='identificationyear']");
+
+                    if (idyear.length > 0) {
+                        var fromdate = $(target).find("input").val().split("/");
+                        var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
+                        idyear.val(dateyear);
+                        $(idyear).attr("value", "01/01/" + dateyear);
+                        that.model.attributes.identificationyear = new Date(fromdate[2], 0, 1, 1);
+                    }
                 }
             }
+
         }
     });
     return NsForm;
