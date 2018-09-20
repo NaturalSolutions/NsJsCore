@@ -422,7 +422,6 @@
             // EDIT : Now DEPRECATED
             /*
             $.each(savedModel, function (index, value) {
-                console.log("savedModel", index, value, that.BBForm.model.attributes[value.index]);
                 if (value.index != "editiondate") {
                     //that.BBForm.model.attributes[value.index] = value.value;
                 }
@@ -697,7 +696,6 @@
                         break;
 
                         //TODO FIND A WAY TO APPLY ONLY ON CREATE, NOT ON EDIT AND IF DEFAULT VALUE IS NOT FORCED AT 0
-                        //console.log("*********", this);
                     case "number":
                         if (value.options && value.options.defaultValue) {
                             if (element.val() == 0)
