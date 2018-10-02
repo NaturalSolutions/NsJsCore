@@ -336,12 +336,12 @@
                 for (var i = 0; i < this.forms.length; i++) {
 
                     if (this.forms[i].model.get('Value') != null || this.forms[i].model.get('Value') == 0) {
-                        if (
-                            (this.forms[i].model.get('ColumnType') == 'Select' && this.forms[i].model.get('Value') == '-1')
+                        if ((this.forms[i].model.get('ColumnType') == 'Select' && this.forms[i].model.get('Value') == '-1')
                             || (this.forms[i].model.get('ColumnType') == 'Checkboxes' && this.forms[i].model.get('Value')[0] == '-1')
                             || (this.forms[i].model.get('Value') != '0' && this.forms[i].model.get('Value') == '')
                             ) {
                             // pas de saisie
+                            console.log("pas de saisie ?!");
                         }
                         else {
                             $('.filter-form-' + this.forms[i].model.get('Column') + ' .filter').addClass(this.ToggleFilter.classBefore);
@@ -353,7 +353,6 @@
                             setTimeout(function (toggleInfo) {
                                 $('.filter-form-' + toggleInfo.columnName + ' .filter').removeClass(toggleInfo.classBefore);
                                 $('.filter-form-' + toggleInfo.columnName + ' .filter').addClass(toggleInfo.classAfter);
-                                //}
                             }, 0, toggleInfo);
                         }
                     }
@@ -769,13 +768,14 @@
                 //var type = typeof currentForm.getValue().Value;
                 var Validation = currentForm.validate();
                 currentForm.$el.find('input.filter').removeClass('active')
-                if (!currentForm.validate()) {
+                if (!Validation) {
                     value = currentForm.getValue();
                     //delete value.ColumnType;
 
                     if (value.Operator == 'between') {
                         var ValueFrom = { Operator: '>=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
                         var ValueTo = { Operator: '<=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
+
                         if (value.From) {
                             ValueFrom.Value = value.From;
                             this.criterias.push(ValueFrom);
@@ -798,6 +798,10 @@
                         }
                     }
                     // TODO Gestion interval
+                }
+                else
+                {
+                    //console.log("test 02", Validation);
                 }
             }
             if (this.clientSide != null) {
