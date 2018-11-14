@@ -294,9 +294,15 @@
         BeforeCreateForm: function () {
         },
         showForm: function () {
+
             var _this = this;
             this.BBForm.render();
             this.render();
+            if (this.name && this.name.toLowerCase() == "ecoleventform")
+            {
+                $("#headerEventForm").css("display", "block");
+                $("#eventTypeName").html(this.BBForm.model.attributes.typeobjname);
+            }
 
             // Call extendable function before the show call
             this.BeforeShow();
@@ -409,6 +415,7 @@
                 savedModel.push({ 'index': index, 'value': value });
             });
             */
+
             var validation = this.BBForm.commit();
             if (validation != null) {
                 sweetAlert({
@@ -419,14 +426,6 @@
                 });
                 return;
             }
-            // EDIT : Now DEPRECATED
-            /*
-            $.each(savedModel, function (index, value) {
-                if (value.index != "editiondate") {
-                    //that.BBForm.model.attributes[value.index] = value.value;
-                }
-            });
-            */
 
             if (this.model.attributes["id"] == 0) {
                 this.model.attributes["id"] = null;
@@ -442,6 +441,9 @@
             }
 
             this.onSavingModel();
+
+            $('.NsFormModuleSave' + that.name).css("display", "none");
+            $('.NsFormModuleCancel' + that.name).css("display", "none");
 
             if (this.model.id == 0) {
                 // New Record
@@ -474,6 +476,8 @@
                     },
                     error: function (model,response) {
                         _this.savingError(model, response);
+                        $('.NsFormModuleSave' + that.name).css("display", "block");
+                        $('.NsFormModuleCancel' + that.name).css("display", "block");
                     }
                 });
             }
@@ -488,6 +492,8 @@
                     },
                     error: function (model, response) {
                         _this.savingError(model, response);
+                        $('.NsFormModuleSave' + that.name).css("display", "block");
+                        $('.NsFormModuleCancel' + that.name).css("display", "block");
                     }
                 });
             }
@@ -747,11 +753,13 @@
 
             if (target.id == "dateTimePicker")
             {
+                $(target).find("input").attr("value", $(target).find("input").val());
+
                 if ($(target).find("input[name='eventdate']").length > 0) {
                     var idyear = $("#EColEventForm input[name='identificationyear']");
 
                     if (idyear.length > 0) {
-                        var fromdate = $(target).find("input").val().split("/");
+                        var fromdate = $(target).find("input").val().replace(" 00:00:00", "").split("/");
                         var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
                         idyear.val(dateyear);
                         $(idyear).attr("value", "01/01/" + dateyear);
