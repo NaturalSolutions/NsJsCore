@@ -248,6 +248,8 @@
                             ctx.onceFetched(params);
                         }
                         ctx.collectionFetched();
+                        if (options.callback)
+                            options.callback();
                     };
                     PageColl.prototype.fetch.call(this, options);
                 }

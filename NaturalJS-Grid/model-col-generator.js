@@ -76,60 +76,42 @@ function (root, colGene, $, _, Backbone, Backgrid, BGSA) {
         },
 
 
-        getHeaderCell: function(){
+        getHeaderCell: function () {
+            var me = this;
             this.hc=Backgrid.HeaderCell.extend({
                 onClick: function (e) {
                     e.preventDefault();
+
                     var that=this;
                     var column = this.column;
                     var collection = this.collection;
                     var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
-                    /*
-                    var sortCriteria = {};
-
-                    switch (column.get('direction')) {
-                        case null:
-                            column.set('direction', 'ascending');
-                            sortCriteria[column.get('name')] = 'asc';
-                            break;
-                        case 'ascending':
-                            column.set('direction', 'descending');
-                            sortCriteria[column.get('name')] = 'desc';
-                            break;
-                        case 'descending':
-                            column.set('direction', null);
-                            delete sortCriteria[column.get('name')];
-                            break;
-                        default:
-                            break;
-
-                    }
                     
-                    */
+                    if (me.lastColumn != that.column.attributes.name)
+                        column.set('direction', null);
+
                     switch(column.get('direction')){
-                        case null:
-                            column.set('direction', 'ascending');
-                            sortCriteria[column.get('name')] = 'asc';
-                            break;
-                        case 'ascending':
+                        default:
                             column.set('direction', 'descending');
                             sortCriteria[column.get('name')] = 'desc';
                             break;
                         case 'descending':
-                            column.set('direction', null);
-                            delete sortCriteria[column.get('name')];
-                            break;
-                        default:
+                            column.set('direction', 'ascending');
+                            sortCriteria[column.get('name')] = 'asc';
                             break;
                     }
-                    
-                    var tmp= this.column.attributes.name;
 
-                    if(!Object.keys(sortCriteria).length > 0)
-                        collection.sortCriteria[tmp] = 'asc';
-                    
+                    var cb = function()
+                    {
+                        that.$el.parent().find('.sortable').removeClass("ascending");
+                        that.$el.parent().find('.sortable').removeClass("descending");
+                        that.$el.addClass(column.get('direction'));
+                    }
+
+                    me.lastColumn = that.column.attributes.name;
                     collection.sortCriteria = sortCriteria;
-                    collection.fetch({reset: true});
+                    collection.fetch({ reset: true, callback: cb });
+
                 },
             });
         },
