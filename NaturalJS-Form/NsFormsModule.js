@@ -760,7 +760,7 @@
 
                     if (idyear.length > 0) {
                         var fromdate = $(target).find("input").val().replace(" 00:00:00", "").split("/");
-                        var dateyear = new Date(fromdate[2], fromdate[1], fromdate[0]).getFullYear();
+                        var dateyear = new Date(fromdate[2], fromdate[1] - 1, fromdate[0]).getFullYear();
                         idyear.val(dateyear);
                         $(idyear).attr("value", "01/01/" + dateyear);
                         that.model.attributes.identificationyear = new Date(fromdate[2], 0, 1, 1);
