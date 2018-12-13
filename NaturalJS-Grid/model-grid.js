@@ -170,7 +170,7 @@
                     var that = this;
                     var column = this.column;
                     var collection = this.collection;
-                    var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
+                    var sortCriteria = {};
                     switch (column.get('direction')) {
                         case null:
                             column.set('direction', 'ascending');
@@ -187,9 +187,7 @@
                         default:
                             break;
                     }
-                    var tmp = this.column.attributes.name;
-                    if (!Object.keys(sortCriteria).length > 0)
-                        collection.sortCriteria[tmp] = 'asc';
+                    collection.sortCriteria = sortCriteria;
                     collection.fetch({ reset: true });
                 },
             });
