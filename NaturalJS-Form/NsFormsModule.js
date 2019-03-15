@@ -284,6 +284,7 @@
                             _this.options.origin.displayPoolList(_this.model.attributes.subjects);
                         }
                     }
+                    _this.AfterCreateForm();
                 },
                 error: function (data) {
                     _this.gettingError(data);
@@ -292,7 +293,13 @@
         },
 
         BeforeCreateForm: function () {
+
         },
+
+        AfterCreateForm: function() {
+
+        },
+
         showForm: function () {
 
             var _this = this;
@@ -344,7 +351,7 @@
         },
 
         AfterShow: function () {
-            //THIS FUNCTION HAS PROVEN USELESS IN MANY OCCASIONS ... (NEVER CALLED ?)
+
         },
 
         displaybuttons: function () {
