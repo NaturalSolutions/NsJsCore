@@ -391,7 +391,7 @@
 
             var editorClass = (dataRow['editorClass'] || '') + ' form-control filter';
 
-            if (type == 'Select' || type == 'Checkboxes' || type == 'AutocompTreeEditor') {
+            if (type == 'Select' || type == 'Checkboxes' || type == 'AutocompTreeEditor' || type.toLowerCase() == 'position') {
                 editorClass += ' list-inline ';
                 options = dataRow['options'];
 
@@ -714,13 +714,11 @@
 
             var valueOptions;
             switch (DataRow['type']) {
-                case "Select": case 'Checkboxes':
-                    return DataRow['options']
-                    break;
+                case "Select":
+                case 'Checkboxes':
                 case 'AutocompTreeEditor':
-                    return DataRow['options']
-                    break;
                 case 'AutocompleteEditor':
+                case 'Position':
                     return DataRow['options']
                     break;
                 case "DATETIME":
@@ -738,7 +736,10 @@
         getOpOptions: function (type) {
             var operatorsOptions;
             switch (type) {
-                case "Text": case "AutocompTreeEditor": case "AutocompleteEditor":
+                case "Text":
+                case "AutocompTreeEditor":
+                case "AutocompleteEditor":
+                case "Position":
                     return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' }, { label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
                     break;
                 case "DateTimePickerEditor":

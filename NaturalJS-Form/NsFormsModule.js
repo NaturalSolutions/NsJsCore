@@ -256,7 +256,6 @@
                 data: { FormName: this.name, ObjectType: this.objectType, DisplayMode: this.displayMode, MainObjectId: this.MainObjectId, SubjectList: this.listofids, Secondary: this.Secondary },
                 dataType: 'json',
                 success: function (resp) {
-
                     if (!_this.schema) {
                         _this.model.schema = resp.schema;
                     }

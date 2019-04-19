@@ -364,7 +364,6 @@
             });
             var resultat = this.paginator.render().el;
 
-
             return resultat;
         },
 
