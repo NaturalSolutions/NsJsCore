@@ -390,38 +390,6 @@
 
         butClickSave: function (e) {
             var that = this;
-
-            // EDIT : Now DEPRECATED 
-            /*var savedModel = [];
-             TODO : For some reasons, BBForms COMMIT modifies dates values ...
-                    This whole scope is temporarily here to prevent dates from being modified ...
-                    
-            $.each(this.BBForm.model.attributes, function (index, value) {
-                if (value)
-                {
-                    if (value.toString().indexOf("/") != -1) {
-                        var splittedDate = value.split("/");
-                        if (splittedDate.length == 3)
-                        {
-                            value = new Date(splittedDate[2], splittedDate[1] - 1, splittedDate[0]);
-                            value.setHours(value.getHours() + 2);
-                            value = value.toJSON();
-                        }
-                    }
-                    else if (value.toString().indexOf("-") != -1 &&
-                    value.toString().indexOf(":") != -1 &&
-                    value.toString().indexOf("T") != -1)
-                    {
-                        value = new Date(value);
-                        value.setHours(value.getHours() + 2);
-                        value = value.toJSON();
-                    }
-                }
-                
-                savedModel.push({ 'index': index, 'value': value });
-            });
-            */
-
             var validation = this.BBForm.commit();
             if (validation != null) {
                 sweetAlert({
@@ -607,6 +575,7 @@
         },
 
         butClickCancel: function (e) {
+            window.onbeforeunload = null;
             e.preventDefault();
             this.displayMode = 'display';
             this.initModel();

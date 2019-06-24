@@ -85,19 +85,27 @@ function (root, colGene, $, _, Backbone, Backgrid, BGSA) {
                     var that=this;
                     var column = this.column;
                     var collection = this.collection;
-                    var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
+                    //TODO Retiré les tris multiples, pas certain que ça soit très pertinent, à voir
+                    var sortCriteria = {};
+                    //var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
                     
                     if (me.lastColumn != that.column.attributes.name)
                         column.set('direction', null);
 
-                    switch(column.get('direction')){
-                        default:
+                    switch (column.get('direction')) {
+                        case null:
                             column.set('direction', 'descending');
                             sortCriteria[column.get('name')] = 'desc';
                             break;
                         case 'descending':
                             column.set('direction', 'ascending');
                             sortCriteria[column.get('name')] = 'asc';
+                            break;
+                        case 'ascending':
+                            column.set('direction', null);
+                            delete sortCriteria[column.get('name')];
+                            break;
+                        default:
                             break;
                     }
 
@@ -109,6 +117,7 @@ function (root, colGene, $, _, Backbone, Backgrid, BGSA) {
                     }
 
                     me.lastColumn = that.column.attributes.name;
+                    console.log("#######FLAG1", sortCriteria);
                     collection.sortCriteria = sortCriteria;
                     collection.fetch({ reset: true, callback: cb });
 
