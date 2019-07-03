@@ -10,11 +10,12 @@
                 'marionette',
                 'backbone_forms',
                 'sweetalert',
+                'i18n',
                 'autosize'
-        ], function ($, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize, exports) {
+        ], function ($, _, Backbone, Marionette, BackboneForm, sweetAlert, i18n, autosize, exports) {
           // Export global even in AMD case in case this script is loaded with
           // others that may still expect a global Backbone.
-            var Retour = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize);
+            var Retour = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, sweetAlert, i18n, autosize);
           return Retour;
       });
 
@@ -30,8 +31,9 @@
         /*var brfs = require('brfs')
         var tpl = brfs('./Templates/NsFormsModule.html');*/
         autosize = require('autosize');
+        i18n = require('i18n');
         
-        module.exports = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, autosize);
+        module.exports = factory(root, exports, $, _, Backbone, Marionette, BackboneForm, autosize, i18n);
 		//return Retour ;
         // Finally, as a browser global.
     } else {
@@ -39,7 +41,7 @@
         //root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
     }
 
-}(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, sweetAlert, autosize) {
+}(this, function (root, NsForm, $, _, Backbone, Marionette, BackboneForm, sweetAlert, i18n, autosize) {
 
     var tpl = '<div id="NsFormButton">'
      +'<button class="NsFormModuleCancel<%=formname%>">'
@@ -393,10 +395,10 @@
             var validation = this.BBForm.commit();
             if (validation != null) {
                 sweetAlert({
-                    title: "Error in form",
-                    text: "The form could not be saved ! Some compulsory fields are empty !",
+                    title: (i18n ? i18n.t("alerts.errInForm") : "Error in form"),
+                    text: (i18n ? i18n.t("alerts.formNotSaved") : "The form could not be saved! Some compulsory fields are empty!"),
                     type: "error",
-                    confirmButtonText: "Understood"
+                    confirmButtonText: (i18n? i18n.t("gen.understood") : "Understood")
                 });
                 return;
             }
@@ -522,10 +524,10 @@
                             if (resp.result) {
                                 setTimeout(function () {
                                     sweetAlert({
-                                        title: "Deletion success!",
-                                        text: "The " + itemType + " has successfully been deleted",
+                                        title: (i18n? i18n.t("alerts.delSuccess") : ""),
+                                        text: (i18n? i18n.t("gen.your") : "") + " " + itemType + " " + (i18n? i18n.t("alerts.successDeleted") : ""),
                                         type: "success",
-                                        confirmButtonText: "Understood"
+                                        confirmButtonText: (i18n? i18n.t("gen.understood") : "")
                                     }, function () {
                                         var newLoc = (window.location.href.split('?')[0]);
                                         if (window.location.href == newLoc)
@@ -538,10 +540,10 @@
                             else if (resp.reason) {
                                 setTimeout(function () {
                                     sweetAlert({
-                                        title: 'Deletion error!',
-                                        text: 'Reason:\n' + resp.reason,
+                                        title: (i18n? i18n.t("alerts.delError") : ""),
+                                        text: (i18n? i18n.t("gen.reason") + "\n" + resp.reason : ""),
                                         type: "error",
-                                        confirmButtonText: "Understood"
+                                        confirmButtonText: (i18n? i18n.t("gen.understood") : "")
                                     });
                                 }, 100);
                             }
@@ -549,10 +551,10 @@
                         error: function (resp) {
                             setTimeout(function () {
                                 sweetAlert({
-                                    title: 'Deletion error!',
+                                    title: (i18n? i18n.t("alerts.delError") : ""),
                                     text: 'Reason:\n' + resp.responseText,
                                     type: "error",
-                                    confirmButtonText: "Understood"
+                                    confirmButtonText: (i18n? i18n.t("gen.understood") : "")
                                 });
                             }, 100);
                         }
@@ -564,11 +566,11 @@
                 confirmDeletion(true);
             else if (idToDelete > 0) {
                 sweetAlert({
-                    title: "Are you sure?",
-                    text: "The " + itemType + " will be lost!",
+                    title: (i18n? i18n.t("alerts.areYouSure") : ""),
+                    text: (i18n ? i18n.t("gen.your") : "") + " " + itemType + " " + (i18n ? i18n.t("alerts.beLost") : ""),
                     type: "warning",
-                    confirmButtonText: "Delete",
-                    cancelButtonText: "Keep it",
+                    confirmButtonText: (i18n? i18n.t("gen.delete") : ""),
+                    cancelButtonText: (i18n? i18n.t("alerts.keep") : ""),
                     showCancelButton: true
                 }, confirmDeletion);
             }

@@ -108,7 +108,6 @@
 
             this.searchPrefix = options.searchPrefix || '';
 
-            console.log("#######FLAG2", options.sortCriteria);
             this.sortCriteria = options.sortCriteria || {};
             this.name = options.name || 'default';
             //this.channel = options.channel;
@@ -188,7 +187,6 @@
                         default:
                             break;
                     }
-                    console.log("#######FLAG3", sortCriteria);
                     collection.sortCriteria = sortCriteria;
                     collection.fetch({ reset: true });
                 },
@@ -212,7 +210,6 @@
 
         initCollectionPaginable: function () {
             var ctx = this;
-            console.log("#######FLAG4", ctx.sortCriteria);
             var PageCollection = PageColl.extend({
                 sortCriteria: ctx.sortCriteria,
                 url: this.url + ctx.searchPrefix + '?name=' + this.name,
@@ -235,7 +232,6 @@
                     },
                 },
                 fetch: function (options) {
-                    console.log("initCollectionPaginable", "fetch", options, this.queryParams, this);
                     ctx.fetchingCollection(options);
                     var params = {
                         'page': this.state.currentPage,
